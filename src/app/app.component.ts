@@ -1,6 +1,6 @@
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Component, ViewChild } from '@angular/core';
-import { FormGroup, FormControl } from '@angular/forms';
+import { FormGroup } from '@angular/forms';
 import { Http, Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import { Observer } from 'rxjs/Observer';
@@ -30,6 +30,7 @@ export class AppComponent {
   private http: Http;
   public uploadForm: FormGroup;
   private selectedFile: File;
+  private selectedPosterFile: File;
   private uploader: Uploader;
   public fileList: string[];
 
@@ -38,7 +39,8 @@ export class AppComponent {
     this.uploader = uploader;
     this.uploadForm = new FormGroup({
       file: new FormControl(''),
-      title: new FormControl('')
+      title: new FormControl(''),
+      poster: new FormControl('')
     });
     this.getFiles();
   }
@@ -47,14 +49,19 @@ export class AppComponent {
     this.selectedFile = (<any>event.srcElement).files[0];
   }
 
+  public updatePoster($event) {
+    this.selectedPosterFile = (<any>event.srcElement).files[0];
+  }
+
   public sendForm() {
     const uploadFile = this.selectedFile;
+    const formData = new FormData();
+    const xhr = new XMLHttpRequest();
     console.log(uploadFile);
 
-    var formData = new FormData();
     formData.append('title', this.uploadForm.controls['title'].value);
     formData.append('files', this.selectedFile);
-    var xhr = new XMLHttpRequest();
+    formData.append('poster', this.selectedPosterFile);
     xhr.open('POST', 'http://localhost:3000/upload');
 
     xhr.onreadystatechange = () => {

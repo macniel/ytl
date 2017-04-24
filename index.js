@@ -32,7 +32,7 @@ var storage = multer.diskStorage({
     },
 });
 
-var upload = multer({ storage: storage }).single('files');
+var upload = multer({ storage: storage }).fields(['files', 'poster']);
 
 app.get('/files/:filename', (req, res) => {
     console.log('GET\t' + req.params['filename']);
@@ -53,12 +53,13 @@ app.get('/files/', (req, res) => {
             console.log('INFO\tpath exists');
             return res.status(200).sendFile(path.join(__dirname, 'uploads', 'index.json'));
         } else {
-            return res.status(500).end('index is not created');
+            fs.writeFileSync(path.join(__dirname, 'uploads', 'index.json'), JSON.stringify([]));
+            return res.status(200).sendFile(path.join(__dirname, 'uploads', 'index.json'));
         }
     });
 });
 
-function updateIndex(req, res, file, title, type) {
+function updateIndex(req, res, file, title, type, posterFileName) {
     let indexJson = [];
     if (fs.existsSync(path.join(__dirname, 'uploads', 'index.json'))) {
         indexJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'uploads', 'index.json')));
@@ -69,6 +70,7 @@ function updateIndex(req, res, file, title, type) {
         title: title,
         created: new Date(),
         filePath: file,
+        posterFilePath: posterFileName,
         isImage: type === 'image',
         isVideo: type === 'video'
     };
@@ -96,7 +98,14 @@ function convertVideoFile(tempFileName, cb) {
 
 
             })
+            .on('start', function (commandLine) {
+                console.log('Spawned Ffmpeg with command: ' + commandLine);
+            })
+            .on('progress', function (progress) {
+                console.log('Processing: ' + progress.percent + '% done');
+            })
             .saveToFile(realFileName, function (stdout, stderr) {
+                console.log('beginning transcoding');
             });
 
     } catch (e) {
@@ -109,6 +118,7 @@ app.post('/upload', (req, res) => {
         res.status(402).send('no files for upload sent').end();
     }
     const file = req.files.files;
+    const poster = req.files.poster;
     const title = req.body.title;
     console.log('RECV\t' + file);
     console.log('POST\t' + req.files.files.name);
@@ -131,14 +141,15 @@ app.post('/upload', (req, res) => {
                 type = 'video';
                 fileName = file.name + '.temp';
             }
-
             file.mv(path.join(__dirname, 'uploads', fileName), (err) => {
                 console.log('MOVE\t' + path.join(__dirname, 'uploads', fileName));
 
                 if (type === 'video') {
-                    console.log('vid');
                     convertVideoFile(path.join(__dirname, 'uploads', fileName), (error, newFilename) => {
-                        updateIndex(req, res, path.join(destinationType, file.name), title, type);
+                        poster.mv(path.join(__dirname, 'uploads', poster.name), (err) => {
+                            updateIndex(req, res, path.join(destinationType, file.name), title, type, path.join(destinationType, poster.name));
+                        })
+
                     });
                 } else {
                     return updateIndex(req, res, path.join(destinationType, file.name), title, type);

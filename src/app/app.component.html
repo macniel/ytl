@@ -1,6 +1,13 @@
 <form [formGroup]="uploadForm" class="card card_full-width">
-  <input type="file" formControlName="file" (change)="updateFile($event)" />
+  <label><span>Video-Datei</span>
+  <input name="video" type="file" formControlName="file" (change)="updateFile($event)" />
+  </label>
+  <label><span>Poster</span>
+  <input name="poster" type="file" formControlName="poster" (change)="updatePoster($event)" />
+  </label>
+  <label><span>Titel</span>
   <input type="text" formControlName="title" />
+  </label>
   <button (click)="sendForm()">Absenden</button>
 </form>
 <hr>
@@ -10,7 +17,8 @@
   <div class="card-content">
 
     <img *ngIf="file.isImage" [src]="getFileSrc(file.filePath)" class="card-image" />
-    <video *ngIf="file.isVideo" [src]="getFileSrc(file.filePath)" width="300" height="250" autoplay controls preload="auto">
+    <video *ngIf="file.isVideo" [src]="getFileSrc(file.filePath)" width="300" height="250" [poster]="getFileSrc(file.posterFilePath)"
+      controls preload="auto">
       <source [src]="getFileSrc(file.filePath)" type="video/mp4" />
     </video>
   </div>

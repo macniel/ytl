@@ -6,17 +6,6 @@ import { Observable } from 'rxjs/Observable';
 import { Observer } from 'rxjs/Observer';
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/map';
-import { UploadItem } from 'angular2-http-file-upload';
-import { Uploader } from 'angular2-http-file-upload';
-
-
-export class FileUploadItem extends UploadItem {
-  constructor(file: any) {
-    super();
-    this.url = 'http://localhost:3000/upload';
-    this.file = file;
-  }
-}
 
 export interface ProcessData {
   processId: number;
@@ -53,11 +42,9 @@ export class AppComponent {
   private http: Http;
   private selectedFile: File;
   private selectedPosterFile: File;
-  private uploader: Uploader;
 
-  constructor(http: Http, uploader: Uploader) {
+  constructor(http: Http) {
     this.http = http;
-    this.uploader = uploader;
     this.uploadForm = new FormGroup({
       file: new FormControl(''),
       title: new FormControl(''),
@@ -120,7 +107,6 @@ export class AppComponent {
           console.log('response', response.json());
           for (let i = 0; i < this.fileList.length; ++i) {
             if (this.fileList[i].processId === record.processId) {
-              this.fileList.splice(i, 1);
               this.fileList[i] = record;
               break;
             }

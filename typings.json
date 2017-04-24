@@ -1,0 +1,5 @@
+{
+  "globalDependencies": {
+    "fluent-ffmpeg": "registry:dt/fluent-ffmpeg#0.0.0+20161121205806"
+  }
+}

@@ -19,7 +19,9 @@ app.use(cors());
 app.get('/videos/:filename', (req, res) => {
     fs.exists(path.join(__dirname, 'uploads', req.params['filename']), (exists) => {
         if (exists) {
+            console.log('STREAM\t', path.join(__dirname, 'uploads', req.params['filename']), 'filesize: ', fs.statSync(path.join(__dirname, 'uploads', req.params['filename'])).size);
             res.setHeader("content-type", "video/mp4");
+            res.setHeader("Content-Length", fs.statSync(path.join(__dirname, 'uploads', req.params['filename'])).size);
             fs.createReadStream(path.join(__dirname, 'uploads', req.params['filename'])).pipe(res);
         } else {
             return res.status(404).end();
@@ -165,7 +167,6 @@ function convertVideoFile(tempFileName, cb) {
         .videoCodec('libx264')
         .withAudioCodec('aac')
         .format('mp4')
-        .outputOptions(['-frag_duration 100', '-movflags frag_keyframe+faststart', '-pix_fmt yuv420p'])
 
         .on('end', function () {
             console.log('file has been converted succesfully');
@@ -230,7 +231,7 @@ app.post('/upload', (req, res) => {
                         poster.mv(path.join(__dirname, 'uploads', poster.name), (err) => {
                             console.log('New FileName', newFilename, 'Poster FileName', poster.name);
                             processId++;
-                            return updateIndex(req, res, path.join(destinationType, newFilename), title, type, path.join(destinationType, poster.name), processId - 1);
+                            return updateIndex(req, res, path.join(destinationType, newFilename), title, type, path.join('files', poster.name), processId - 1);
                         })
 
                     });

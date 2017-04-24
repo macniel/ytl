@@ -4,6 +4,8 @@ import { FormGroup } from '@angular/forms';
 import { Http, Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import { Observer } from 'rxjs/Observer';
+import { Subject } from 'rxjs/Subject';
+import 'rxjs/add/operator/map';
 import { UploadItem } from 'angular2-http-file-upload';
 import { Uploader } from 'angular2-http-file-upload';
 
@@ -16,6 +18,24 @@ export class FileUploadItem extends UploadItem {
   }
 }
 
+export interface ProcessData {
+  processId: number;
+  state: string;
+  progress: number;
+}
+
+export interface Record {
+  title: string;
+  created: Date;
+  filePath: string;
+  posterFilePath: string;
+  isImage: boolean;
+  isVideo: boolean;
+  isAvailable: boolean;
+  processId: number;
+  processInfo?: ProcessData;
+};
+
 
 @Component({
   selector: 'app-root',
@@ -23,16 +43,17 @@ export class FileUploadItem extends UploadItem {
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'app works!';
 
   @ViewChild('#fileUpload') file: HTMLInputElement;
 
-  private http: Http;
   public uploadForm: FormGroup;
+  public fileList: Record[];
+  public timer: any[] = [];
+
+  private http: Http;
   private selectedFile: File;
   private selectedPosterFile: File;
   private uploader: Uploader;
-  public fileList: string[];
 
   constructor(http: Http, uploader: Uploader) {
     this.http = http;
@@ -78,6 +99,9 @@ export class AppComponent {
   public getFiles(): any {
     this.http.get('http://localhost:3000/files/').subscribe((response) => {
       this.fileList = response.json();
+      this.fileList.forEach((file) => {
+        this.getProcessForFile(file);
+      });
     });
   }
 
@@ -85,4 +109,28 @@ export class AppComponent {
     return 'http://localhost:3000/' + fileName;
   }
 
+  public getProcessForFile(file) {
+    if (this.timer[file.processId]) {
+      clearInterval(this.timer[file.processId]);
+    }
+    this.timer[file.processId] = setInterval(() => {
+      this.http.get('http://localhost:3000/upload/status/' + file.processId)
+        .subscribe((response) => {
+          const record: Record = response.json();
+          console.log('response', response.json());
+          for (let i = 0; i < this.fileList.length; ++i) {
+            if (this.fileList[i].processId === record.processId) {
+              this.fileList.splice(i, 1);
+              this.fileList[i] = record;
+              break;
+            }
+          }
+          if (record.isAvailable === true) {
+            clearInterval(this.timer[file.processId]);
+          }
+        });
+    }, 1000);
+  }
+
 }
+

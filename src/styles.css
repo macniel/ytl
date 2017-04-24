@@ -36,6 +36,7 @@ hr {
 
 .card-content {
     text-align: center;
+    position: relative;
 }
 
 .card-image {
@@ -65,4 +66,23 @@ label {
 }
 button {
     margin-top: 20px;
+}
+
+
+.card-process-fill {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(255,255,255,0.75);
+}
+
+.card-process-state {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    line-height: 300px;
+    vertical-align: middle;
 }

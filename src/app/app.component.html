@@ -18,8 +18,15 @@
 
     <img *ngIf="file.isImage" [src]="getFileSrc(file.filePath)" class="card-image" />
     <video *ngIf="file.isVideo" [src]="getFileSrc(file.filePath)" width="300" height="250" [poster]="getFileSrc(file.posterFilePath)"
-      controls preload="auto">
+      [controls]="file.isAvailable" preload="auto">
       <source [src]="getFileSrc(file.filePath)" type="video/mp4" />
     </video>
+    <div class="card-process-info" *ngIf="file.processInfo != null && file?.processInfo?.state !== 'ACCESSIBLE'">
+
+      <div class="card-process-fill" [style.width]="(100-file?.processInfo?.progress) + '%'">
+      </div>
+      <span class="card-process-state">{{file.processInfo.state}}
+        </span>
+    </div>
   </div>
 </div>

@@ -6,7 +6,12 @@
 <hr>
 <div *ngFor="let file of fileList" class="card">
   <h2 class="card-title">{{file.title}}</h2>
+
   <div class="card-content">
-    <img [src]="getFileSrc(file.filePath)" class="card-image" />
+
+    <img *ngIf="file.isImage" [src]="getFileSrc(file.filePath)" class="card-image" />
+    <video *ngIf="file.isVideo" [src]="getFileSrc(file.filePath)" width="300" height="250" autoplay controls preload="auto">
+      <source [src]="getFileSrc(file.filePath)" type="video/mp4" />
+    </video>
   </div>
 </div>

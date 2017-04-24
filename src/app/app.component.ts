@@ -54,8 +54,6 @@ export class AppComponent {
     var formData = new FormData();
     formData.append('title', this.uploadForm.controls['title'].value);
     formData.append('files', this.selectedFile);
-
-    console.log(formData);
     var xhr = new XMLHttpRequest();
     xhr.open('POST', 'http://localhost:3000/upload');
 

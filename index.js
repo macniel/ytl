@@ -21,7 +21,6 @@ app.get('/videos/:filename', (req, res) => {
         if (exists) {
             console.log('STREAM\t', path.join(__dirname, 'uploads', req.params['filename']), 'filesize: ', fs.statSync(path.join(__dirname, 'uploads', req.params['filename'])).size);
             res.setHeader("content-type", "video/mp4");
-            res.setHeader("Content-Length", fs.statSync(path.join(__dirname, 'uploads', req.params['filename'])).size);
             fs.createReadStream(path.join(__dirname, 'uploads', req.params['filename'])).pipe(res);
         } else {
             return res.status(404).end();

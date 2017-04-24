@@ -86,7 +86,6 @@ function updateIndex(req, res, file, title, type, posterFileName, processId) {
         isAvailable: type === 'image',
         processId: processId
     };
-    console.log(payload);
     indexJson.push(payload);
     fs.writeFileSync(path.join(__dirname, 'uploads', 'index.json'), JSON.stringify(indexJson));
     return res.status(201).send(payload).end();
@@ -94,6 +93,24 @@ function updateIndex(req, res, file, title, type, posterFileName, processId) {
 
 function recordExists(filename) {
     return fs.existsSync(path.join(__dirname, 'uploads', filename));
+}
+
+function findNextProcessId() {
+    let latest = -1;
+    if (fs.existsSync(path.join(__dirname, 'uploads', 'index.json'))) {
+        indexJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'uploads', 'index.json')));
+    } else {
+        indexJson = [];
+    }
+    for (let file of indexJson) {
+        if (file.processId > latest) {
+            latest = file.processId;
+        }
+
+
+    }
+    latest++;
+    return latest;
 }
 
 function updateIndexRelease(processId) {
@@ -108,7 +125,7 @@ function updateIndexRelease(processId) {
             break;
         }
     }
-    console.log('updated index releases');
+    console.log('INFO\tupdated index releases');
     fs.writeFileSync(path.join(__dirname, 'uploads', 'index.json'), JSON.stringify(indexJson));
 }
 
@@ -116,7 +133,7 @@ function updateIndexRelease(processId) {
 let processData = [
 
 ];
-let processId = 0;
+let processId = -1;
 app.get('/upload/status/:processId', (req, res) => {
     if (fs.existsSync(path.join(__dirname, 'uploads', 'index.json'))) {
         indexJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'uploads', 'index.json')));
@@ -124,9 +141,10 @@ app.get('/upload/status/:processId', (req, res) => {
         indexJson = [];
     }
     for (let file of indexJson) {
-        if (file.processId === processId) {
+        if (file.processId == req.params['processId']) {
+
             for (let process of processData) {
-                if (process.processId === file.processId) {
+                if (process.processId == file.processId) {
                     file.processInfo = process;
                 }
             }
@@ -147,20 +165,16 @@ function prepareProcessInfo(processId) {
             state: 'CREATED',
             progress: '0'
         };
-        console.log('created processData for processId', processId);
+        console.log('INFO\tcreated processData for processId', processId);
         processData.push(processInfo);
-        console.log('pending processes', processData);
     }
     return processInfo;
 }
 
 function convertVideoFile(tempFileName, cb) {
     let realFileName = tempFileName.replace(/\.temp$/g, '');
-    let thisProcessId = processId;
+    let thisProcessId = findNextProcessId();
     let processInfo = prepareProcessInfo(thisProcessId);
-
-    console.log('sourceFile: ', fs.existsSync(path.join(__dirname, 'uploads', tempFileName)) ? 'exists' : ' does not exist');
-    console.log('targetFile: ', fs.existsSync(path.join(__dirname, 'uploads', realFileName)) ? 'exists' : ' does not exist');
 
     var proc = new ffmpeg({ source: path.join(__dirname, 'uploads', tempFileName) })
         .videoCodec('libx264')
@@ -168,27 +182,26 @@ function convertVideoFile(tempFileName, cb) {
         .format('mp4')
 
         .on('end', function () {
-            console.log('file has been converted succesfully');
+            console.log('INFO\tfile has been converted succesfully');
             processInfo.state = 'FINISHED_CONVERTING';
             fs.unlink(path.join(__dirname, 'uploads', tempFileName), () => {
                 processInfo.state = 'ACCESSIBLE';
-                updateIndexRelease(processId);
+                updateIndexRelease(thisProcessId);
             });
         })
         .on('start', function (commandLine) {
 
             processInfo.state = 'STARTED_CONVERTING';
 
-            console.log('Spawned Ffmpeg with command: ' + commandLine);
+            console.log('INFO\tSpawned Ffmpeg with command: ' + commandLine);
         })
         .on('progress', function (progress) {
             processInfo.state = 'CONVERTING';
             processInfo.progress = progress.percent;
-            console.log('Processing: ' + progress.percent + '% done');
         })
         .saveToFile(path.join(__dirname, 'uploads', realFileName), function (stdout, stderr) {
             processInfo.state = 'STARTED_TRANSCODING';
-            console.log('beginning transcoding');
+            console.log('INFO\tbeginning transcoding');
         });
     cb(null, realFileName, thisProcessId);
 
@@ -228,7 +241,6 @@ app.post('/upload', (req, res) => {
                 if (type === 'video') {
                     convertVideoFile(fileName, (error, newFilename, processId) => {
                         poster.mv(path.join(__dirname, 'uploads', poster.name), (err) => {
-                            console.log('New FileName', newFilename, 'Poster FileName', poster.name);
                             processId++;
                             return updateIndex(req, res, path.join(destinationType, newFilename), title, type, path.join('files', poster.name), processId - 1);
                         })
@@ -250,7 +262,7 @@ app.post('/upload', (req, res) => {
 });
 
 app.listen(3000, () => {
-    console.log('Server is started on port 3000');
+    console.log('INIT\tServer is started on port 3000');
     if (!fs.existsSync(path.join(__dirname, 'uploads'))) {
         fs.mkdirSync(path.join(__dirname, 'uploads'));
         console.log('\rINIT\tupload dir created');

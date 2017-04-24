@@ -9,21 +9,22 @@ const multer = require('multer');
 const fs = require('fs');
 const mime = require('mime');
 const app = express();
+const ffmpeg = require('fluent-ffmpeg');
+ffmpeg.setFfmpegPath('c:\\ffmpeg\\bin\\ffmpeg.exe');
 
 app.use(fileUpload());
 app.use(cors());
+
+
+app.get('/videos/:filename', (req, res) => {
+    res.setHeader("content-type", "video/mp4");
+    fs.createReadStream(path.join(__dirname, 'uploads', req.params['filename'])).pipe(res);
+});
 
 var storage = multer.diskStorage({
     // destino del fichero
     destination: function (req, file, cb) {
         cb(null, path.join(__dirname, 'uploads'));
-    },
-    fileFilter: function (req, file, cb) {
-        if (file.mimetype !== 'image/png') {
-            req.fileValidationError = 'goes wrong on the mimetype';
-            return cb(null, false, new Error('goes wrong on the mimetype'));
-        }
-        cb(null, true);
     },
     // renombrar fichero
     filename: function (req, file, cb) {
@@ -57,7 +58,7 @@ app.get('/files/', (req, res) => {
     });
 });
 
-function updateIndex(req, res, file, title) {
+function updateIndex(req, res, file, title, type) {
     let indexJson = [];
     if (fs.existsSync(path.join(__dirname, 'uploads', 'index.json'))) {
         indexJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'uploads', 'index.json')));
@@ -67,7 +68,9 @@ function updateIndex(req, res, file, title) {
     payload = {
         title: title,
         created: new Date(),
-        filePath: file
+        filePath: file,
+        isImage: type === 'image',
+        isVideo: type === 'video'
     };
     console.log(payload);
     indexJson.push(payload);
@@ -77,6 +80,28 @@ function updateIndex(req, res, file, title) {
 
 function recordExists(filename) {
     return fs.existsSync(path.join(__dirname, 'uploads', filename));
+}
+
+function convertVideoFile(tempFileName, cb) {
+    var realFileName = tempFileName.replace(/\.temp$/g, '');
+    try {
+        var proc = new ffmpeg({ source: tempFileName })
+            .usingPreset('divx')
+            .on('end', function () {
+                console.log('file has been converted succesfully');
+                fs.rename(tempFileName, realFileName, (error) => {
+                    console.log('file has been renamed for public');
+                    cb(null, realFileName);
+                });
+
+
+            })
+            .saveToFile(realFileName, function (stdout, stderr) {
+            });
+
+    } catch (e) {
+        cb(e, tempFileName);
+    }
 }
 
 app.post('/upload', (req, res) => {
@@ -93,10 +118,34 @@ app.post('/upload', (req, res) => {
     }
     upload(req, res, (error) => {
         if (!error) {
-            file.mv(path.join(__dirname, 'uploads', file.name), (err) => {
-                console.log('MOVE\t' + path.join(__dirname, 'uploads', file.name));
-                return updateIndex(req, res, path.join('files', file.name), title);
+            let destinationType = '';
+            let type = '';
+            let fileName = '';
+            if (file.mimetype.startsWith('image')) {
+                destinationType = 'files';
+                type = 'image';
+                fileName = file.name;
+
+            } else {
+                destinationType = 'videos';
+                type = 'video';
+                fileName = file.name + '.temp';
+            }
+
+            file.mv(path.join(__dirname, 'uploads', fileName), (err) => {
+                console.log('MOVE\t' + path.join(__dirname, 'uploads', fileName));
+
+                if (type === 'video') {
+                    console.log('vid');
+                    convertVideoFile(path.join(__dirname, 'uploads', fileName), (error, newFilename) => {
+                        updateIndex(req, res, path.join(destinationType, file.name), title, type);
+                    });
+                } else {
+                    return updateIndex(req, res, path.join(destinationType, file.name), title, type);
+                }
             });
+
+
         } else {
             console.error(error);
         }

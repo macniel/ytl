@@ -103,11 +103,11 @@ export class AppComponent {
     this.timer[file.processId] = setInterval(() => {
       this.http.get('http://localhost:3000/upload/status/' + file.processId)
         .subscribe((response) => {
-          const record: Record = response.json();
+          const record: ProcessData = response.json();
           console.log('response', response.json());
           for (let i = 0; i < this.fileList.length; ++i) {
             if (this.fileList[i].processId === record.processId) {
-              this.fileList[i] = record;
+              this.fileList[i].processInfo = record;
               break;
             }
           }

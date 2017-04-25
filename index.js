@@ -7,19 +7,20 @@ const path = require('path');
 const fileUpload = require('express-fileupload');
 const multer = require('multer');
 const fs = require('fs');
-const mime = require('mime');
 const app = express();
-const ffmpeg = require('fluent-ffmpeg');
-ffmpeg.setFfmpegPath('c:\\ffmpeg\\bin\\ffmpeg.exe');
-
 app.use(fileUpload());
 app.use(cors());
+
+var seneca = require('seneca')()
+seneca.use('./src-backend/_process-info.js', { seneca: seneca, __rootdir: __dirname });
+seneca.use('./src-backend/_converter.js', { seneca: seneca, __rootdir: __dirname });
+seneca.use('./src-backend/_file-info.js', { seneca: seneca, __rootdir: __dirname });
+
 
 
 app.get('/videos/:filename', (req, res) => {
     fs.exists(path.join(__dirname, 'uploads', req.params['filename']), (exists) => {
         if (exists) {
-            console.log('STREAM\t', path.join(__dirname, 'uploads', req.params['filename']), 'filesize: ', fs.statSync(path.join(__dirname, 'uploads', req.params['filename'])).size);
             res.setHeader("content-type", "video/mp4");
             fs.createReadStream(path.join(__dirname, 'uploads', req.params['filename'])).pipe(res);
         } else {
@@ -43,7 +44,6 @@ var storage = multer.diskStorage({
 var upload = multer({ storage: storage }).fields(['files', 'poster']);
 
 app.get('/files/:filename', (req, res) => {
-    console.log('GET\t' + req.params['filename']);
     fs.exists(path.join(__dirname, 'uploads', req.params['filename']), (exists) => {
         if (exists) {
             res.status(200).sendFile(req.params['filename'], { root: path.join(__dirname, 'uploads') });
@@ -55,158 +55,25 @@ app.get('/files/:filename', (req, res) => {
 })
 
 app.get('/files/', (req, res) => {
-    console.log('INDEX\t');
-    fs.exists(path.join(__dirname, 'uploads', 'index.json'), (exists) => {
-        if (exists) {
-            console.log('INFO\tpath exists');
-            return res.status(200).sendFile(path.join(__dirname, 'uploads', 'index.json'));
-        } else {
-            fs.writeFileSync(path.join(__dirname, 'uploads', 'index.json'), JSON.stringify([]));
-            return res.status(200).sendFile(path.join(__dirname, 'uploads', 'index.json'));
-        }
+    seneca.act({ list: 'files' }, (error, files) => {
+        return res.status(200).send(files).end();
     });
 });
 
-
-
-function updateIndex(req, res, file, title, type, posterFileName, processId) {
-    let indexJson = [];
-    if (fs.existsSync(path.join(__dirname, 'uploads', 'index.json'))) {
-        indexJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'uploads', 'index.json')));
-    } else {
-        indexJson = [];
-    }
-    payload = {
-        title: title,
-        created: new Date(),
-        filePath: file,
-        posterFilePath: posterFileName,
-        isImage: type === 'image',
-        isVideo: type === 'video',
-        isAvailable: type === 'image',
-        processId: processId
-    };
-    indexJson.push(payload);
-    fs.writeFileSync(path.join(__dirname, 'uploads', 'index.json'), JSON.stringify(indexJson));
-    return res.status(201).send(payload).end();
-}
-
-function recordExists(filename) {
-    return fs.existsSync(path.join(__dirname, 'uploads', filename));
-}
-
-function findNextProcessId() {
-    let latest = -1;
-    if (fs.existsSync(path.join(__dirname, 'uploads', 'index.json'))) {
-        indexJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'uploads', 'index.json')));
-    } else {
-        indexJson = [];
-    }
-    for (let file of indexJson) {
-        if (file.processId > latest) {
-            latest = file.processId;
-        }
-
-
-    }
-    latest++;
-    return latest;
-}
-
-function updateIndexRelease(processId) {
-    if (fs.existsSync(path.join(__dirname, 'uploads', 'index.json'))) {
-        indexJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'uploads', 'index.json')));
-    } else {
-        indexJson = [];
-    }
-    for (let file of indexJson) {
-        if (file.processId === processId) {
-            file.isAvailable = true;
-            break;
-        }
-    }
-    console.log('INFO\tupdated index releases');
-    fs.writeFileSync(path.join(__dirname, 'uploads', 'index.json'), JSON.stringify(indexJson));
-}
-
-
-let processData = [
-
-];
-let processId = -1;
 app.get('/upload/status/:processId', (req, res) => {
-    if (fs.existsSync(path.join(__dirname, 'uploads', 'index.json'))) {
-        indexJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'uploads', 'index.json')));
-    } else {
-        indexJson = [];
-    }
-    for (let file of indexJson) {
-        if (file.processId == req.params['processId']) {
 
-            for (let process of processData) {
-                if (process.processId == file.processId) {
-                    file.processInfo = process;
-                }
-            }
-            return res.status(200).send(file).end();
+    seneca.act({ info: 'file', processId: req.params['processId'] }, (error, file) => {
+        if (!error) {
+            res.send(file).status(200).end();
+        } else {
+            res.status(404).end();
         }
-    }
-    return res.status(404).send('process not available').end;
+    });
 });
 
-
-function prepareProcessInfo(processId) {
-    let processInfo = processData.find((value) => {
-        return value.processId === processId;
-    });
-    if (!processInfo) {
-        processInfo = {
-            processId: processId,
-            state: 'CREATED',
-            progress: '0'
-        };
-        console.log('INFO\tcreated processData for processId', processId);
-        processData.push(processInfo);
-    }
-    return processInfo;
-}
-
-function convertVideoFile(tempFileName, cb) {
-    let realFileName = tempFileName.replace(/\.temp$/g, '');
-    let thisProcessId = findNextProcessId();
-    let processInfo = prepareProcessInfo(thisProcessId);
-
-    var proc = new ffmpeg({ source: path.join(__dirname, 'uploads', tempFileName) })
-        .videoCodec('libx264')
-        .withAudioCodec('aac')
-        .format('mp4')
-
-        .on('end', function () {
-            console.log('INFO\tfile has been converted succesfully');
-            processInfo.state = 'FINISHED_CONVERTING';
-            fs.unlink(path.join(__dirname, 'uploads', tempFileName), () => {
-                processInfo.state = 'ACCESSIBLE';
-                updateIndexRelease(thisProcessId);
-            });
-        })
-        .on('start', function (commandLine) {
-
-            processInfo.state = 'STARTED_CONVERTING';
-
-            console.log('INFO\tSpawned Ffmpeg with command: ' + commandLine);
-        })
-        .on('progress', function (progress) {
-            processInfo.state = 'CONVERTING';
-            processInfo.progress = progress.percent;
-        })
-        .saveToFile(path.join(__dirname, 'uploads', realFileName), function (stdout, stderr) {
-            processInfo.state = 'STARTED_TRANSCODING';
-            console.log('INFO\tbeginning transcoding');
-        });
-    cb(null, realFileName, thisProcessId);
-
-}
-
+/**
+ * FIXME: serious need in refactoring as this route handler is way to big and should delegate most actions to the microservices
+ */
 app.post('/upload', (req, res) => {
     if (!req.files) {
         res.status(402).send('no files for upload sent').end();
@@ -214,12 +81,7 @@ app.post('/upload', (req, res) => {
     const file = req.files.files;
     const poster = req.files.poster;
     const title = req.body.title;
-    console.log('RECV\t' + file);
-    console.log('POST\t' + req.files.files.name);
-    console.log('PROC\t');
-    if (recordExists(file.name)) {
-        return res.status(400).end('File already exists');
-    }
+
     upload(req, res, (error) => {
         if (!error) {
             let destinationType = '';
@@ -236,18 +98,24 @@ app.post('/upload', (req, res) => {
                 fileName = file.name + '.temp';
             }
             file.mv(path.join(__dirname, 'uploads', fileName), (err) => {
-                console.log('MOVE\t' + path.join(__dirname, 'uploads', fileName));
 
                 if (type === 'video') {
-                    convertVideoFile(fileName, (error, newFilename, processId) => {
+                    seneca.act({ convert: 'video', fileName: fileName }, (error, newFilename, processId) => {
                         poster.mv(path.join(__dirname, 'uploads', poster.name), (err) => {
-                            processId++;
-                            return updateIndex(req, res, path.join(destinationType, newFilename), title, type, path.join('files', poster.name), processId - 1);
+                            seneca.act({
+                                update: 'file',
+                                file: path.join(destinationType, newFilename),
+                                title: title,
+                                type: type,
+                                posterFile: path.join('files', poster.name),
+                                processId: processId
+                            }, (error, result) => {
+                                res.send(result).status(201).end();
+                            });
                         })
 
                     });
                 } else {
-                    return updateIndex(req, res, path.join(destinationType, file.name), title, type);
                 }
             });
 

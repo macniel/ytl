@@ -103,20 +103,20 @@ export class AppComponent {
     this.timer[file.processId] = setInterval(() => {
       this.http.get('http://localhost:3000/upload/status/' + file.processId)
         .subscribe((response) => {
-          const record: ProcessData = response.json();
+          const record: Record = response.json();
           console.log('response', response.json());
           for (let i = 0; i < this.fileList.length; ++i) {
             if (this.fileList[i].processId === record.processId) {
-              this.fileList[i].processInfo = record;
+              this.fileList[i] = record;
+              if (record.isAvailable === true) {
+                clearInterval(this.timer[file.processId]);
+              }
               break;
             }
           }
-          if (record.isAvailable === true) {
-            clearInterval(this.timer[file.processId]);
-          }
+
         });
     }, 1000);
   }
 
 }
-

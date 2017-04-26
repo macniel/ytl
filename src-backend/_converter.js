@@ -53,7 +53,7 @@ module.exports = function (options) {
         proc.saveToFile(path.join(__rootdir, 'uploads', realFileName), function (stdout, stderr) {
             console.log('INFO\tbeginning transcoding');
         });
-        done(null, realFileName, processId);
+        done(null, {fileName: realFileName, processId: processId});
 
     });
 

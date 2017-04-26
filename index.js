@@ -83,6 +83,7 @@ app.post('/upload', (req, res) => {
     const title = req.body.title;
 
     upload(req, res, (error) => {
+
         if (!error) {
             let destinationType = '';
             let type = '';
@@ -100,7 +101,9 @@ app.post('/upload', (req, res) => {
             file.mv(path.join(__dirname, 'uploads', fileName), (err) => {
 
                 if (type === 'video') {
-                    seneca.act({ convert: 'video', fileName: fileName }, (error, newFilename, processId) => {
+                    seneca.act({ convert: 'video', fileName: fileName }, (error, data) => {
+                        const newFilename = data.fileName;
+                        const processId = data.processId;
                         poster.mv(path.join(__dirname, 'uploads', poster.name), (err) => {
                             seneca.act({
                                 update: 'file',

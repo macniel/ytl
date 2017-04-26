@@ -14,7 +14,8 @@ module.exports = function (options) {
         if (!fs.existsSync(filename)) {
             fs.writeFileSync(filename, JSON.stringify([]));
         }
-        indexJson = JSON.parse(filename);
+        indexJson = JSON.parse(fs.readFileSync(filename));
+        console.log('emitting', indexJson);
         done(null, indexJson);
     });
 

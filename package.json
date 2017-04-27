@@ -30,6 +30,7 @@
     "fluent-ffmpeg": "^2.1.2",
     "fluent-ffmpeg-extended": "^1.5.2",
     "jsonwebtoken": "^7.4.0",
+    "material-icons": "^0.1.0",
     "mongoose": "^4.9.6",
     "morgan": "^1.8.1",
     "multer": "^1.3.0",

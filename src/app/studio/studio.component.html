@@ -1,0 +1,28 @@
+<form [formGroup]="uploadForm" class="card card_full-width">
+  <label><span>Video-Datei</span>
+  <input name="video" type="file" formControlName="file" (change)="updateFile($event)" />
+  </label>
+  <label><span>Poster</span>
+  <input name="poster" type="file" formControlName="poster" (change)="updatePoster($event)" />
+  </label>
+  <label><span>Titel</span>
+  <input type="text" formControlName="title" />
+  </label>
+  <button (click)="sendForm()">Absenden</button>
+</form>
+<hr>
+<div *ngFor="let file of fileList" class="card">
+  <h2 class="card-title">{{file.title}}</h2>
+
+  <div class="card-content">
+
+    <img [src]="getFileSrc(file.posterFilePath)" width="300" height="250" />
+    <div class="card-process-info" *ngIf="file.processInfo != null && file?.processInfo?.state !== 'ACCESSIBLE'">
+
+      <div class="card-process-fill" [style.width]="(100-file?.processInfo?.progress) + '%'">
+      </div>
+      <span class="card-process-state">{{file.processInfo.state}}
+        </span>
+    </div>
+  </div>
+</div>

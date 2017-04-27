@@ -1,32 +1,38 @@
-<form [formGroup]="uploadForm" class="card card_full-width">
-  <label><span>Video-Datei</span>
-  <input name="video" type="file" formControlName="file" (change)="updateFile($event)" />
-  </label>
-  <label><span>Poster</span>
-  <input name="poster" type="file" formControlName="poster" (change)="updatePoster($event)" />
-  </label>
-  <label><span>Titel</span>
-  <input type="text" formControlName="title" />
-  </label>
-  <button (click)="sendForm()">Absenden</button>
-</form>
-<hr>
-<div *ngFor="let file of fileList" class="card">
-  <h2 class="card-title">{{file.title}}</h2>
+<div class="header">
 
-  <div class="card-content">
+  <div class="header-logo">
+    <a routerLink="/">
+      <img src="assets/logo.png" />
+    </a>
+  </div>
 
-    <img *ngIf="file.isImage" [src]="getFileSrc(file.filePath)" class="card-image" />
-    <video *ngIf="file.isVideo" [src]="getFileSrc(file.filePath)" width="300" height="250" [poster]="getFileSrc(file.posterFilePath)"
-      [controls]="file.isAvailable" preload="auto">
-      <source [src]="getFileSrc(file.filePath)" type="video/mp4" />
-    </video>
-    <div class="card-process-info" *ngIf="file.processInfo != null && file?.processInfo?.state !== 'ACCESSIBLE'">
+  <input type="search" class="header-search" />
 
-      <div class="card-process-fill" [style.width]="(100-file?.processInfo?.progress) + '%'">
-      </div>
-      <span class="card-process-state">{{file.processInfo.state}}
-        </span>
+  <div *ngIf="user?.isLoggedIn" class="header-controls">
+    <a routerLink="/create" class="header-control">
+      <i class="material-icons">cloud_upload</i>
+    </a>
+    <div class="header-control">
+      <span class="label-with-icon">{{user.userName}}</span>
+
+      <i class="material-icons">settings</i>
     </div>
   </div>
+  <div *ngIf="!user?.isLoggedIn" class="header-controls">
+
+    <div class="header-control {{popupVisible?'active':''}}">
+      <i class="material-icons" (click)="popupVisible=!popupVisible">person</i>
+    </div>
+    <div class="popup-content login {{popupVisible?'active': ''}}">
+      <div [formGroup]="loginForm">
+        <h4>Anmelden</h4>
+        <input type="text" formControlName="userName" />
+        <input type="password" formControlName="password" />
+        <button>Registrieren</button> <button (click)="login()">Login</button>
+      </div>
+    </div>
+  </div>
+
 </div>
+
+<router-outlet></router-outlet>

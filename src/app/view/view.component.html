@@ -1,0 +1,8 @@
+<div class="card card-big">
+
+  <video *ngIf="file != null" [src]="getFileSrc(file)" [poster]="getPosterFileSrc(file)" width="600" height="500" controls="true">
+  </video>
+
+  <h4>{{file?.title}}</h4>
+
+</div>

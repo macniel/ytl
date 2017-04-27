@@ -8,7 +8,7 @@
   border-radius: 2px;
   display: inline-block;
   height: 300px;
-  margin: 20px;
+  margin-right: 20px;
   position: relative;
   width: 300px;
   float: left;
@@ -24,6 +24,16 @@ hr {
     overflow: hidden;
     text-align: center;
 }
+
+.card-big {
+    width: 600px;
+    height: 600px;
+    padding-top: 0;
+}
+.card-big video {
+    background-color: black;
+}
+
 .card h2 {
     margin: 10px 0 0px 10px;
     vertical-align: top;
@@ -85,4 +95,109 @@ button {
     bottom: 0;
     line-height: 300px;
     vertical-align: middle;
+}
+
+body {
+    margin: 80px 60px 20px 60px;
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+.header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 48px;
+    background-color: #00545E;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    color: white;
+}
+
+.header-logo {
+    line-height: 48px;
+    margin-top: 8px;
+    width: 80px;
+    padding-left: 50px;
+    margin-right: 10px;
+    float: left;
+}
+
+.header-search {
+    width: 400px;
+    border-radius: 2px;
+    height: 36px;
+    margin-top: 6px;
+    float: left;
+}
+
+.header-controls {
+    padding-right: 60px;
+}
+
+.header-control {
+    margin: 2px;
+    padding: 10px;
+}
+
+.header-control {
+    float: right;
+}
+
+.header-control.active {
+    background-color: #fff;
+    color: rgb(32, 116, 147);
+
+}
+
+.popup {
+
+}
+
+.popup-content.active {
+    display: block;
+}
+
+.popup-content {
+  display: none;
+  background-color: #fff;
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+  position: absolute;
+  right: 110px;
+  top: 40px;
+  width: 240px;
+  color: rgba(0,0,0,0.5);
+}
+
+.popup-content h4 {
+    margin-left: 20px;
+}
+.popup-content input {
+    width: 200px;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-bottom: 10px;
+    display: block;
+}
+.popup-content button {
+    margin-top: 10px;
+    width: 50%;
+    float: left;
+    padding: 10px 20px;
+    background: rgb(32, 116, 147);
+    font-weight: bold;
+    border: 0;
+    color: rgba(255, 255, 255, 0.8);
+}
+.popup-content button+button {
+    border-left: 1px solid white;
+}
+
+
+a.header-control {
+    color: white;
+}
+
+.label-with-icon {
+    vertical-align: 6px;
+    margin-right: 2px;
 }

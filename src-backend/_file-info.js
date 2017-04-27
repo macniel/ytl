@@ -1,65 +1,45 @@
 const fs = require('fs');
 const path = require('path');
 
+const FILE_NOT_FOUND = 'FILE_NOT_FOUND';
+
 module.exports = function (options) {
     seneca = options.seneca;
     __rootdir = options.__rootdir;
 
-    /**
-     * performs a listing on the uploaded video files
-     */
-    this.add({ list: 'files' }, function (args, done) {
+    // internal functions
+
+    listFiles = function () {
         let indexJson = [];
         const filename = path.join(__rootdir, 'uploads', 'index.json');
         if (!fs.existsSync(filename)) {
             fs.writeFileSync(filename, JSON.stringify([]));
         }
         indexJson = JSON.parse(fs.readFileSync(filename));
-        console.log('emitting', indexJson);
-        done(null, indexJson);
-    });
+        return indexJson;
+    }
 
-    /**
-     * returns one specfic file record amongs the uploaded video files, also adds process info
-     */
-    this.add({ info: 'file' }, function (args, done) {
-        const processId = args.processId;
-        let indexJson = [];
-        if (fs.existsSync(path.join(__rootdir, 'uploads', 'index.json'))) {
-            indexJson = JSON.parse(fs.readFileSync(path.join(__rootdir, 'uploads', 'index.json')));
-        } else {
-            indexJson = [];
-        }
+    getFile = function (processId) {
+
+        let indexJson = listFiles();
         for (let file of indexJson) {
             if (file.processId == processId) {
-
-                return seneca.act({ info: 'process', processId: processId }, (error, processData) => {
-                    file.processInfo = processData;
-                    return done(null, file);
-                });
+                return file;
             }
         }
+        throw FILE_NOT_FOUND;
+    }
 
-        done(new Error('File not found'), null);
-    });
+    updateFile = function (fileInfo) {
 
-    /**
-     * Updates a File Record and overwrites the contents if the given processId is already in use
-     */
-    this.add({ update: 'file' }, function (args, done) {
-        const processId = args.processId;
-        const posterFile = args.posterFile;
-        const file = args.file;
-        const title = args.title;
-        const type = args.type;
-        let indexJson = [];
+        const processId = fileInfo.processId;
+        const posterFile = fileInfo.posterFile;
+        const file = fileInfo.file;
+        const title = fileInfo.title;
+        const type = fileInfo.type;
+        let indexJson = listFiles();
         console.log('UPDATE\tprocesId', processId);
 
-        if (fs.existsSync(path.join(__rootdir, 'uploads', 'index.json'))) {
-            indexJson = JSON.parse(fs.readFileSync(path.join(__rootdir, 'uploads', 'index.json')));
-        } else {
-            indexJson = [];
-        }
         payload = {
             title: title,
             created: new Date(),
@@ -83,7 +63,56 @@ module.exports = function (options) {
             indexJson.push(payload);
         }
         fs.writeFileSync(path.join(__rootdir, 'uploads', 'index.json'), JSON.stringify(indexJson));
-        done(null, payload);
+        return payload;
+    }
+
+    markFileForRelease = function (processId) {
+        indexJson = listFiles();
+        for (let file of indexJson) {
+            if (file.processId === processId) {
+                file.isAvailable = true;
+                console.log('INFO\tupdated index releases');
+                fs.writeFileSync(path.join(__rootdir, 'uploads', 'index.json'), JSON.stringify(indexJson));
+                return file;
+                break;
+            }
+        }
+        return FILE_NOT_FOUND;
+    }
+
+    // seneca message bindings
+
+    /**
+     * performs a listing on the uploaded video files
+     */
+    this.add({ list: 'files' }, function (args, done) {
+        done(null, listFiles());
+    });
+
+    /**
+     * returns one specfic file record amongs the uploaded video files, also adds process info
+     */
+    this.add({ info: 'file' }, function (args, done) {
+        const processId = args.processId;
+        try {
+            let file = getFile(processId);
+            return seneca.act({ info: 'process', processId: processId }, (error, processData) => {
+                file.processInfo = processData;
+                done(null, file);
+            });
+        } catch (e) {
+            console.log('ERROR\t' + e);
+            if (e === FILE_NOT_FOUND) {
+                done(new Error('File not found'), null);
+            }
+        }
+    });
+
+    /**
+     * Updates a File Record and overwrites the contents if the given processId is already in use
+     */
+    this.add({ update: 'file' }, function (args, done) {
+        done(null, updateFile(args));
     });
 
     /**
@@ -91,18 +120,11 @@ module.exports = function (options) {
      */
     this.add({ release: 'file' }, function (args, done) {
         const processId = args.processId;
-        if (fs.existsSync(path.join(__rootdir, 'uploads', 'index.json'))) {
-            indexJson = JSON.parse(fs.readFileSync(path.join(__rootdir, 'uploads', 'index.json')));
-        } else {
-            indexJson = [];
-        }
-        for (let file of indexJson) {
-            if (file.processId === processId) {
-                file.isAvailable = true;
-                console.log('INFO\tupdated index releases');
-                fs.writeFileSync(path.join(__rootdir, 'uploads', 'index.json'), JSON.stringify(indexJson));
-                done(null, file);
-                break;
+        try {
+            done(null, markFileForRelease(processId));
+        } catch (e) {
+            if (e === FILE_NOT_FOUND) {
+                done(new Error('File not found'), null);
             }
         }
     });

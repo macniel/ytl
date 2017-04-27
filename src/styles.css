@@ -123,11 +123,39 @@ body {
 }
 
 .header-search {
-    width: 400px;
+    position: relative;
+    float: left;
+}
+
+.header-search input {
+    width: 600px;
     border-radius: 2px;
+    border: 0;
     height: 36px;
     margin-top: 6px;
-    float: left;
+
+    font-size: 14pt;
+    padding: 8px;
+    background-color: rgba(255, 255,255, 0.5);
+    position: relative;
+}
+.header-search button {
+    display: flex;
+    position: absolute;
+    width: 60px;
+    height: 36px;
+    top: -4px;
+    right: 0;
+align-items: center;
+justify-content: center;
+    border-radius: 0;
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-left: 1px solid rgba(255, 255, 255, 0.6);
+}
+.header-search button i {
+    margin-top: -3px;
 }
 
 .header-controls {

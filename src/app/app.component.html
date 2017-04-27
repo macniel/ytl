@@ -6,8 +6,12 @@
     </a>
   </div>
 
+  <div class="header-search">
   <input type="search" class="header-search" />
-
+  <button>
+    <i class="material-icons">search</i>
+  </button>
+  </div>
   <div *ngIf="user?.isLoggedIn" class="header-controls">
     <a routerLink="/create" class="header-control">
       <i class="material-icons">cloud_upload</i>

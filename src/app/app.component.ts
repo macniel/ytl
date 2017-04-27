@@ -76,6 +76,7 @@ export class AppComponent {
       if (xhr.readyState === 4 && xhr.status >= 200 && xhr.status <= 299) {
         this.getFiles();
         this.uploadForm.reset();
+
       } else if (xhr.readyState === 4 && xhr.status >= 300) {
         console.error(xhr.responseText);
       }

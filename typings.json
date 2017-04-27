@@ -1,6 +1,7 @@
 {
   "globalDependencies": {
     "fluent-ffmpeg": "registry:dt/fluent-ffmpeg#0.0.0+20161121205806",
+    "mongoose": "registry:dt/mongoose#4.7.0+20170322192047",
     "seneca": "registry:dt/seneca#2.1.0+20161005184000"
   },
   "globalDevDependencies": {

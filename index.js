@@ -8,14 +8,28 @@ const fileUpload = require('express-fileupload');
 const multer = require('multer');
 const fs = require('fs');
 const app = express();
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const jwt = require('jsonwebtoken');
+const config = require('./lib/config');
+const User = require('./lib/models/user');
+const bcrypt = require('bcrypt');
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 app.use(fileUpload());
 app.use(cors());
 
-var seneca = require('seneca')()
+app.set('superSecret', config.secret);
+
+const seneca = require('seneca')()
 seneca.use('./lib/process-info.js', { seneca: seneca, __rootdir: __dirname });
 seneca.use('./lib/converter.js', { seneca: seneca, __rootdir: __dirname });
 seneca.use('./lib/file-info.js', { seneca: seneca, __rootdir: __dirname });
 
+const port = process.env.PORT || 3000;
+mongoose.connect(config.database);
 
 
 app.get('/videos/:filename', (req, res) => {
@@ -42,6 +56,81 @@ var storage = multer.diskStorage({
 });
 
 var upload = multer({ storage: storage }).fields(['files', 'poster']);
+
+app.post('/register', (req, res) => {
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync(req.body.password, salt);
+
+    const user = new User({
+        name: req.body.name,
+        password: hash,
+        creator: req.body.isCreator,
+        gravatarUrl: req.body.gravatar
+    });
+
+    console.log(user);
+
+    user.save((error) => {
+        res.status(201).send(user).end();
+    });
+
+});
+
+app.get('/users', (req, res) => {
+    User.find({}, (error, users) => {
+        res.send(users).status(204).end();
+    });
+});
+
+app.get('/user', (req, res) => {
+
+    const token = req.body.token || req.query.token || req.headers['x-access-token'];
+
+    jwt.verify(token, app.get('superSecret'), (error, user) => {
+        if (!error) {
+            res.status(200).send({
+                name: user.name,
+            creator: user.creator,
+        gravatar: user.gravatarUrl}).end();
+        } else {
+            res.status(401).end();
+        }
+    });
+
+});
+
+app.post('/login', (req, res) => {
+    User.findOne({ name: req.body.name }, (error, user) => {
+
+        if (error) throw error;
+
+        if (!user) {
+            res.json({ success: false, message: 'Authentication failed. User not found.' });
+        } else if (user) {
+
+            // check if password matches
+
+            if (!bcrypt.compareSync(req.body.password, user.password)) {
+                res.json({ success: false, message: 'Authentication failed. Wrong password.' });
+            } else {
+
+                // if user is found and password is right
+                // create a token
+                var token = jwt.sign(user.toJSON(), app.get('superSecret'), {
+                    expiresIn: 60 * 60 * 24
+                });
+
+                // return the information including token as JSON
+                res.json({
+                    success: true,
+                    message: 'Enjoy your token!',
+                    token: token
+                });
+            }
+
+        }
+    });
+});
 
 app.get('/files/:filename', (req, res) => {
     fs.exists(path.join(__dirname, 'uploads', req.params['filename']), (exists) => {
@@ -132,8 +221,8 @@ app.post('/upload', (req, res) => {
 
 });
 
-app.listen(3000, () => {
-    console.log('INIT\tServer is started on port 3000');
+app.listen(port, () => {
+    console.log('INIT\tServer is started on port', port);
     if (!fs.existsSync(path.join(__dirname, 'uploads'))) {
         fs.mkdirSync(path.join(__dirname, 'uploads'));
         console.log('\rINIT\tupload dir created');

@@ -37,13 +37,13 @@ export class UserService {
     }
   }
 
-  private wsRegister(userName, password) {
+  private wsRegister(userName, password, isCreator, avatarUrl) {
 
     const headers = new Headers();
     headers.append('Content-Type', 'application/json');
     const opts: RequestOptionsArgs = { headers: headers };
 
-    return this.http.post('http://localhost:3000/register', { userName: userName, password: password }, opts).map((result) => {
+    return this.http.post('http://localhost:3000/register', { userName: userName, password: password, isCreator: isCreator, avatarUrl: avatarUrl }, opts).map((result) => {
       return true;
     }, (error) => {
       return false;
@@ -79,8 +79,8 @@ export class UserService {
     return this.wsVerify();
   }
 
-  public register(userName, password): Observable<boolean> {
-    return this.wsRegister(userName, password);
+  public register(userName, password, isCreator, avatarUrl): Observable<boolean> {
+    return this.wsRegister(userName, password, isCreator, avatarUrl);
   }
 
   public login(userName, password): Observable<any> {

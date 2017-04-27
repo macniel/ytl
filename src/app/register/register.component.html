@@ -1,3 +1,30 @@
-<p>
-  register works!
-</p>
+<div class="full-background">
+
+  <div class="card card-register" [formGroup]="registerForm">
+
+    <h4>Registrieren</h4>
+
+    <label><span>Benutzername</span>
+    <input formControlName="userName"/>
+    </label>
+
+    <label><input type="checkbox" formControlName="isCreator"/> Als Content-Creator anmelden</label>
+    <p>Als Content-Creator kannst du Videos hochladen und auch in Tags erwähnt werden. Diese Einstellung kann später geändert
+      werden.
+    </p>
+
+
+    <label><span>Link zu einem Avatar</span>
+      <input type="url" formControlName="avatarUrl"/>
+      </label>
+
+    <label class="{{passwordError?'error':''}}"><span>Passwort eingabe</span>
+    <input type="password" formControlName="password"/>
+    <input type="password" formControlName="passwordReentry"/>
+    </label>
+
+    <button (click)="register()">Registrieren</button>
+
+  </div>
+
+</div>

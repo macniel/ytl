@@ -1,3 +1,4 @@
+import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Component, ViewChild, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
@@ -18,7 +19,7 @@ export class AppComponent implements OnInit {
   public loginForm: FormGroup;
   public popupVisible = false;
 
-  constructor(private userService: UserService) {
+  constructor(private userService: UserService, private router: Router) {
     this.loginForm = new FormGroup({
       userName: new FormControl(''),
       password: new FormControl('')
@@ -39,6 +40,10 @@ export class AppComponent implements OnInit {
     }, (error) => {
       console.error(error);
     });
+  }
+
+  public register() {
+    this.router.navigate(['register']);
   }
 
   ngOnInit() {

@@ -136,7 +136,7 @@ body {
 
 .header-control {
     margin: 2px;
-    padding: 10px;
+    padding: 9px;
 }
 
 .header-control {
@@ -162,10 +162,11 @@ body {
   background-color: #fff;
   box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
   position: absolute;
-  right: 110px;
+  right: 62px;
   top: 40px;
   width: 240px;
   color: rgba(0,0,0,0.5);
+  z-index: 2;
 }
 
 .popup-content h4 {
@@ -179,15 +180,19 @@ body {
     display: block;
 }
 .popup-content button {
-    margin-top: 10px;
     width: 50%;
     float: left;
+}
+
+button {
+    margin-top: 10px;
     padding: 10px 20px;
     background: rgb(32, 116, 147);
-    font-weight: bold;
+    text-transform: uppercase;
     border: 0;
     color: rgba(255, 255, 255, 0.8);
 }
+
 .popup-content button+button {
     border-left: 1px solid white;
 }
@@ -200,4 +205,57 @@ a.header-control {
 .label-with-icon {
     vertical-align: 6px;
     margin-right: 2px;
+}
+
+.full-background {
+    position: absolute;
+    z-index: 3;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(to bottom, #00545e 0%,#00545e 50%,#ffffff 50%,#ffffff 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card-register {
+    width: 360px;
+    height: 444px;
+    padding: 20px;
+}
+
+.card-register p {
+    padding-left: 24px;
+    text-align: left;
+    font-weight: normal;
+    color: rgba(0,0,0,.6);
+}
+
+.card-register label {
+    width: 100%;
+    float: none;
+}
+
+.card-register label span {
+    font-size: 13pt;
+    height: initial;
+    margin-botom: 5px;
+}
+.card-register input:not([type='checkbox']) {
+    width: 100%;
+    font-size: 12pt;
+    height: 20px;
+}
+
+.card-register input+input {
+    margin-top: 10px;
+}
+
+.card-register label:first-child {
+    margin-top: 0;
+}
+.card-register label {
+    margin-top: 20px;
 }

@@ -2,5 +2,8 @@
   "globalDependencies": {
     "fluent-ffmpeg": "registry:dt/fluent-ffmpeg#0.0.0+20161121205806",
     "seneca": "registry:dt/seneca#2.1.0+20161005184000"
+  },
+  "globalDevDependencies": {
+    "chai": "registry:dt/chai#3.4.0+20170217154556"
   }
 }

@@ -12,9 +12,9 @@ app.use(fileUpload());
 app.use(cors());
 
 var seneca = require('seneca')()
-seneca.use('./src-backend/_process-info.js', { seneca: seneca, __rootdir: __dirname });
-seneca.use('./src-backend/_converter.js', { seneca: seneca, __rootdir: __dirname });
-seneca.use('./src-backend/_file-info.js', { seneca: seneca, __rootdir: __dirname });
+seneca.use('./lib/process-info.js', { seneca: seneca, __rootdir: __dirname });
+seneca.use('./lib/converter.js', { seneca: seneca, __rootdir: __dirname });
+seneca.use('./lib/file-info.js', { seneca: seneca, __rootdir: __dirname });
 
 
 

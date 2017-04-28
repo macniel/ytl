@@ -11,7 +11,8 @@ import 'rxjs/add/operator/map';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
+
 })
 export class AppComponent implements OnInit {
 
@@ -19,10 +20,34 @@ export class AppComponent implements OnInit {
   public loginForm: FormGroup;
   public popupVisible = false;
 
+  private isDescendant(parent, child) {
+     var node = child.parentNode;
+     while (node != null) {
+         if (node == parent) {
+             return true;
+         }
+         node = node.parentNode;
+     }
+     return false;
+}
+
+  public onClick($event: MouseEvent) {
+
+    if ( $event.srcElement.getAttribute('data-toggle') != 'popupLogin' ) {
+      this.popupVisible = false;
+    }
+  }
+
   constructor(private userService: UserService, private router: Router) {
     this.loginForm = new FormGroup({
       userName: new FormControl(''),
       password: new FormControl('')
+    });
+  }
+
+  public logout() {
+    this.userService.invalidate().subscribe( (user) => {
+      this.user = user;
     });
   }
 

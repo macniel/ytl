@@ -138,8 +138,10 @@ body {
 }
 
 .header-search input {
-    width: 600px;
-    border-radius: 2px;
+    width: 540px;
+    border-radius: 9;
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
     border: 0;
     height: 36px;
     margin-top: 6px;
@@ -155,7 +157,7 @@ body {
     width: 60px;
     height: 36px;
     top: -4px;
-    right: 0;
+    right: -60px;
 align-items: center;
 justify-content: center;
     border-radius: 0;

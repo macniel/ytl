@@ -18,6 +18,10 @@
 
       <i class="material-icons" (click)="logout()">power_settings_new</i>
     </div>
+    <a routerLink="/create" class="header-control">
+      <i class="material-icons">cloud_upload</i>
+    </a>
+
   </div>
   <div *ngIf="!user?.isLoggedIn" class="header-controls">
 

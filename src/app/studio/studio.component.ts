@@ -59,7 +59,6 @@ export class StudioComponent {
     const uploadFile = this.selectedFile;
     const formData = new FormData();
     const xhr = new XMLHttpRequest();
-    console.log(uploadFile);
 
     formData.append('title', this.uploadForm.controls['title'].value);
     formData.append('files', this.selectedFile);
@@ -99,7 +98,6 @@ export class StudioComponent {
       this.http.get('http://localhost:3000/upload/status/' + file.processId)
         .subscribe((response) => {
           const record: Record = response.json();
-          console.log('response', response.json());
           for (let i = 0; i < this.fileList.length; ++i) {
             if (this.fileList[i].processId === record.processId) {
               this.fileList[i] = record;

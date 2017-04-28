@@ -16,8 +16,6 @@ export class UserService {
   constructor(private http: Http) { }
 
   private wsLogin(userName, password) {
-    console.log('wsLogin called');
-    console.log(sessionStorage.getItem('token'));
     if (sessionStorage.getItem('token') != null) {
       return Observable.of(null);
     } else {
@@ -28,10 +26,8 @@ export class UserService {
       return this.http.post('http://localhost:3000/login', { userName: userName, password: password }, opts).map((result) => {
         const token = result.json().token;
         sessionStorage.setItem('token', token);
-        console.log(token);
         return token;
       }, (error) => {
-        console.error(error);
         return null;
       });
     }
@@ -63,7 +59,6 @@ export class UserService {
       user.isLoggedIn = true;
       return user;
     }, (error) => {
-      console.error(error);
       return {
         userId: '-1',
         isCreator: false,
@@ -75,6 +70,18 @@ export class UserService {
 
   }
 
+  public invalidate() {
+    sessionStorage.removeItem('token');
+
+    return Observable.of({
+      userId: '-1',
+      isCreator: false,
+      userName: 'anonymous',
+      avatar: '',
+      isLoggedIn: false
+    });
+  }
+
   public verify(): Observable<User> {
     return this.wsVerify();
   }
@@ -84,7 +91,6 @@ export class UserService {
   }
 
   public login(userName, password): Observable<any> {
-    console.log('login called');
     return this.wsLogin(userName, password);
   }
 

@@ -2,6 +2,14 @@
     font-family: 'Roboto';
 }
 
+app-root {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  padding: 80px 60px 20px 60px;
+}
 
 .card {
   background: #fff;
@@ -60,7 +68,9 @@ hr {
 .card_full-width {
     padding: 20px;
     height: 60px;
-    width: 940px;
+    float: none;
+    display: block;
+    width: inherit;
 }
 
 label span {
@@ -174,6 +184,7 @@ justify-content: center;
 .header-control.active {
     background-color: #fff;
     color: rgb(32, 116, 147);
+    box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
 
 }
 

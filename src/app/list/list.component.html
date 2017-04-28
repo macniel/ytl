@@ -1,4 +1,5 @@
 <h4>Recent Uploads</h4>
+<div class="video-list">
 <div *ngFor="let file of fileList" class="card" [routerLink]="['watch',file.videoId]">
   <div class="card-content ">
 
@@ -8,3 +9,4 @@
     <span class="timemark">{{getTimemark(file)}}</span>
 
   </div>
+</div>

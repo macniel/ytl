@@ -16,7 +16,8 @@ app-root {
   border-radius: 2px;
   display: inline-block;
   height: 250px;
-  margin-right: 20px;
+  margin-right: 40px;
+  margin-bottom: 20px;
   position: relative;
   width: 300px;
   float: left;
@@ -390,4 +391,8 @@ h5 hr {
   background-color: rgba(	0, 84, 94, .9);
   text-align: right;
   padding: 5px;
+}
+
+.video-list {
+  margin-right: -40px;
 }

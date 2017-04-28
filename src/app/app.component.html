@@ -25,10 +25,11 @@
   </div>
   <div *ngIf="!user?.isLoggedIn" class="header-controls">
 
-    <div class="header-control {{popupVisible?'active':''}}">
-      <i class="material-icons" (click)="popupVisible=!popupVisible">person</i>
+    <div data-toggle="popupLogin" class="header-control {{popupVisible?'active':''}}" (click)="popupVisible=!popupVisible">
+      <span data-toggle="popupLogin" class="label-with-icon">Anmelden</span>
+      <i data-toggle="popupLogin" class="material-icons">person</i>
     </div>
-    <div class="popup-content login {{popupVisible?'active': ''}}">
+    <div id="popupLogin" class="popup-content login {{popupVisible?'active': ''}}">
       <div [formGroup]="loginForm">
         <h4>Anmelden</h4>
         <input type="text" formControlName="userName" />

@@ -127,7 +127,7 @@ app.get('/files/', (req, res) => {
 });
 
 app.get('/files/watch/:filename', (req, res) => {
-    seneca.act({ info: 'file', processId: req.params['filename'] }, (error, file) => {
+    seneca.act({ info: 'file', videoId: req.params['filename'] }, (error, file) => {
         if (!error) {
             return res.status(200).send(file).end();
         } else {
@@ -136,9 +136,8 @@ app.get('/files/watch/:filename', (req, res) => {
     });
 });
 
-app.get('/upload/status/:processId', (req, res) => {
-
-    seneca.act({ info: 'file', processId: req.params['processId'] }, (error, file) => {
+app.get('/upload/status/:videoId', (req, res) => {
+    seneca.act({ info: 'file', videoId: req.params['videoId'] }, (error, file) => {
         if (!error) {
             res.send(file).status(200).end();
         } else {
@@ -182,9 +181,9 @@ app.post('/upload', (req, res) => {
                 file.mv(path.join(__dirname, 'uploads', fileName), (err) => {
 
                     if (type === 'video') {
-                        seneca.act({ convert: 'video', fileName: fileName, userName: user.userName }, (error, data) => {
+                        seneca.act({ convert: 'video', fileName: fileName, user: user.userId }, (error, data) => {
                             const newFilename = data.fileName;
-                            const processId = data.processId;
+                            const videoId = data.videoId;
                             poster.mv(path.join(__dirname, 'uploads', poster.name), (err) => {
                                 seneca.act({
                                     update: 'file',
@@ -192,7 +191,7 @@ app.post('/upload', (req, res) => {
                                     title: title,
                                     type: type,
                                     posterFile: path.join('files', poster.name),
-                                    processId: processId
+                                    videoId: videoId
                                 }, (error, result) => {
                                     res.send(result).status(201).end();
                                 });

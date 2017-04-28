@@ -16,7 +16,7 @@ export interface Record {
   isImage: boolean;
   isVideo: boolean;
   isAvailable: boolean;
-  processId: number;
+  videoId: string;
   processInfo?: ProcessData;
 };
 
@@ -91,18 +91,18 @@ export class StudioComponent {
   }
 
   public getProcessForFile(file) {
-    if (this.timer[file.processId]) {
-      clearInterval(this.timer[file.processId]);
+    if (this.timer[file.videoId]) {
+      clearInterval(this.timer[file.videoId]);
     }
-    this.timer[file.processId] = setInterval(() => {
-      this.http.get('http://localhost:3000/upload/status/' + file.processId)
+    this.timer[file.videoId] = setInterval(() => {
+      this.http.get('http://localhost:3000/upload/status/' + file.videoId)
         .subscribe((response) => {
           const record: Record = response.json();
           for (let i = 0; i < this.fileList.length; ++i) {
-            if (this.fileList[i].processId === record.processId) {
+            if (this.fileList[i].videoId === record.videoId) {
               this.fileList[i] = record;
               if (record.isAvailable === true) {
-                clearInterval(this.timer[file.processId]);
+                clearInterval(this.timer[file.videoId]);
               }
               break;
             }

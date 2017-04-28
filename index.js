@@ -28,8 +28,33 @@ const port = process.env.PORT || 3000;
 app.get('/videos/:filename', (req, res) => {
     fs.exists(path.join(__dirname, 'uploads', req.params['filename']), (exists) => {
         if (exists) {
-            res.setHeader("content-type", "video/mp4");
-            fs.createReadStream(path.join(__dirname, 'uploads', req.params['filename'])).pipe(res);
+
+            var range = req.headers.range;
+     if (!range) {
+      // 416 Wrong range
+      return res.sendStatus(416);
+     }
+     var positions = range.replace(/bytes=/, "").split("-");
+     var start = parseInt(positions[0], 10);
+     const stats = fs.statSync(path.join(__dirname, 'uploads', req.params['filename']));
+     var total = stats.size;
+     var end = positions[1] ? parseInt(positions[1], 10) : total - 1;
+     var chunksize = (end - start) + 1;
+
+     res.writeHead(206, {
+       "Content-Range": "bytes " + start + "-" + end + "/" + total,
+       "Accept-Ranges": "bytes",
+       "Content-Length": chunksize,
+       "Content-Type": "video/mp4"
+     });
+
+     const stream = fs.createReadStream(path.join(__dirname, 'uploads', req.params['filename']), { start: start, end: end });
+     stream.on("open", function() {
+         stream.pipe(res);
+     });
+     stream.on("error", function(err) {
+         res.end(err);
+     });
         } else {
             return res.status(404).end();
         }

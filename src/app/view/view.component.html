@@ -1,8 +1,31 @@
 <div class="card card-big">
 
-  <video *ngIf="file != null" [src]="getFileSrc(file)" [poster]="getPosterFileSrc(file)" width="600" height="500" controls="true">
+  <video id="video" *ngIf="file != null" [src]="getFileSrc(file)" [poster]="getPosterFileSrc(file)" width="600" height="500">
   </video>
+  <div class="video-controls {{isPaused()?'':'video-controls-hide'}}" *ngIf="file != null">
 
+    <div class="video-control time-code">
+      {{timeCode}}
+    </div>
+
+    <div class="video-control skip-previous" (click)="skipPrevious()">
+      <i class="material-icons">skip_previous</i>
+    </div>
+    <div class="video-control play-pause" (click)="playOrPause()">
+      <i class="material-icons">{{isPaused() ? 'play_arrow': 'pause'}}</i>
+    </div>
+    <div class="video-control skip-next" (click)="skipNext()">
+      <i class="material-icons">skip_next</i>
+    </div>
+
+  </div>
   <h4>{{file?.title}}</h4>
+
+</div>
+
+<div class="card card-related">
+
+  <h5><span>Verwandte Videos</span><hr></h5>
+
 
 </div>

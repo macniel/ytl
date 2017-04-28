@@ -261,6 +261,12 @@ a.header-control {
     align-items: center;
 }
 
+.card-related {
+    margin-left: 40px;
+    margin-right: 0;
+    box-shadow: none;
+}
+
 .card-register {
     width: 360px;
     height: 444px;
@@ -299,4 +305,67 @@ a.header-control {
 }
 .card-register label {
     margin-top: 20px;
+}
+
+.video-controls {
+  position: relative;
+  top: -106px;
+  padding: 16px 0;
+}
+
+
+@keyframes fade_out{
+    from {opacity: 1}
+    to {opacity: 0}
+}
+video:hover ~ .video-controls {
+  opacity: 1;
+}
+.video-controls-hide {
+}
+
+.video-control {
+  padding: 4px;
+  background-color: rgba(	0, 84, 94, .5);
+  color: white;
+  display: inline-block;
+  margin-right: 10px;
+  position: relative;
+}
+.video-control:first-child {
+  margin-left: 0;
+}
+.video-control i {
+  font-size: 58px;
+}
+
+.video-control.skip-previous i, .video-control.skip-next i {
+  font-size: 32px;
+}
+
+.video-control.skip-previous, .video-control.skip-next {
+  top: -12px;
+}
+
+.video-control.time-code {
+  height: 20px;
+    top: -20px;
+    background: none;
+}
+
+h5 {
+  display: flex;
+  margin-top: 0;
+
+}
+h5 span {
+  width: 200px;
+  padding-left: 0;
+  padding-right: 10px;
+  background-color: #fff;
+}
+h5 hr {
+  display: block;
+  width: 100%;
+  border: 1px solid #d7d7d7;
 }

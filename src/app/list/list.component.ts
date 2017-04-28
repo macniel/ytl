@@ -8,7 +8,8 @@ export interface Record {
   isImage: boolean;
   isVideo: boolean;
   isAvailable: boolean;
-  processId: number;
+  videoId: string;
+  timemark: number;
 };
 
 @Component({
@@ -35,6 +36,14 @@ export class ListComponent implements OnInit {
     this.http.get('http://localhost:3000/files/').subscribe((response) => {
       this.fileList = response.json();
     });
+  }
+
+  public getTimemark(file) {
+      const minutes = Math.floor(file.timemark / 60);
+      const seconds = Math.floor(file.timemark % 60);
+      const secondsString = (seconds <= 9 ? "0" + seconds : seconds);
+
+      return minutes + ":" + secondsString; 
   }
 
 }

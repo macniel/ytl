@@ -61,6 +61,7 @@ export class AppComponent implements OnInit {
       console.log(result);
       this.userService.verify().subscribe((user) => {
         this.user = user;
+        this.loginForm.reset();
       });
     }, (error) => {
       console.error(error);

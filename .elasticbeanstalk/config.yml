@@ -1,0 +1,54 @@
+branch-defaults:
+  master:
+    environment: dev-env
+    group_suffix: null
+container_commands:
+  01_enable_rootaccess:
+    command: echo Defaults:root \!requiretty >> /etc/sudoers
+  02_install_mongo:
+    command: yum install -y mongo-10gen-server
+    ignoreErrors: true
+  03_turn_mongod_off:
+    command: sudo chkconfig mongod off
+  04_create_mongos_startup_script:
+    command: sudo sh -c "echo '/usr/bin/mongos -configdb $MONGO_CONFIG_IPS -fork -logpath
+      /var/log/mongo/mongos.log --logappend' > /etc/init.d/mongos.sh"
+  05_update_mongos_startup_permissions:
+    command: sudo chmod +x /etc/init.d/mongos.sh
+  06_start_mongos:
+    command: sudo bash /etc/init.d/mongos.sh
+  07_install_angular_cli:
+    command: npm install -g @angular/cli
+environment-defaults:
+  dev-env:
+    branch: null
+    repository: null
+files:
+  /etc/yum.repos.d/mongodb.repo:
+    content: '[MongoDB]
+
+      name=MongoDB Repository
+
+      baseurl=http://downloads-distro.mongodb.org/repo/redhat/os/x86_64
+
+      gpgcheck=0
+
+      enabled=1
+
+      '
+    mode: '000644'
+global:
+  application_name: YTL
+  branch: null
+  default_ec2_keyname: aws-eb
+  default_platform: Node.js
+  default_region: us-west-2
+  instance_profile: null
+  platform_name: null
+  platform_version: null
+  profile: eb-cli
+  repository: null
+  sc: git
+  workspace_type: Application
+sources:
+  /usr/local/bin: http://ffmpeg.gusari.org/static/64bit/ffmpeg.static.64bit.latest.tar.gz

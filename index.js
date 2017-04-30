@@ -18,10 +18,10 @@ app.use(fileUpload());
 app.use(cors());
 
 const seneca = require('seneca')()
-seneca.use('./lib/process-info.js', { seneca: seneca, __rootdir: __dirname });
-seneca.use('./lib/converter.js', { seneca: seneca, __rootdir: __dirname });
-seneca.use('./lib/file-info.js', { seneca: seneca, __rootdir: __dirname });
-seneca.use('./lib/user.js', { seneca: seneca, __rootdir: __dirname });
+seneca.use('./lib/processInfoMicroservice/router.js', { seneca: seneca, __rootdir: __dirname });
+seneca.use('./lib/converterMicroservice/router.js', { seneca: seneca, __rootdir: __dirname });
+seneca.use('./lib/fileInfoMicroservice/router.js', { seneca: seneca, __rootdir: __dirname });
+seneca.use('./lib/userMicroservice/router.js', { seneca: seneca, __rootdir: __dirname });
 const port = process.env.PORT || 3000;
 
 
@@ -30,31 +30,31 @@ app.get('/videos/:filename', (req, res) => {
         if (exists) {
 
             var range = req.headers.range;
-     if (!range) {
-      // 416 Wrong range
-      return res.sendStatus(416);
-     }
-     var positions = range.replace(/bytes=/, "").split("-");
-     var start = parseInt(positions[0], 10);
-     const stats = fs.statSync(path.join(__dirname, 'uploads', req.params['filename']));
-     var total = stats.size;
-     var end = positions[1] ? parseInt(positions[1], 10) : total - 1;
-     var chunksize = (end - start) + 1;
+            if (!range) {
+                // 416 Wrong range
+                return res.sendStatus(416);
+            }
+            var positions = range.replace(/bytes=/, "").split("-");
+            var start = parseInt(positions[0], 10);
+            const stats = fs.statSync(path.join(__dirname, 'uploads', req.params['filename']));
+            var total = stats.size;
+            var end = positions[1] ? parseInt(positions[1], 10) : total - 1;
+            var chunksize = (end - start) + 1;
 
-     res.writeHead(206, {
-       "Content-Range": "bytes " + start + "-" + end + "/" + total,
-       "Accept-Ranges": "bytes",
-       "Content-Length": chunksize,
-       "Content-Type": "video/mp4"
-     });
+            res.writeHead(206, {
+                "Content-Range": "bytes " + start + "-" + end + "/" + total,
+                "Accept-Ranges": "bytes",
+                "Content-Length": chunksize,
+                "Content-Type": "video/mp4"
+            });
 
-     const stream = fs.createReadStream(path.join(__dirname, 'uploads', req.params['filename']), { start: start, end: end });
-     stream.on("open", function() {
-         stream.pipe(res);
-     });
-     stream.on("error", function(err) {
-         res.end(err);
-     });
+            const stream = fs.createReadStream(path.join(__dirname, 'uploads', req.params['filename']), { start: start, end: end });
+            stream.on("open", function () {
+                stream.pipe(res);
+            });
+            stream.on("error", function (err) {
+                res.end(err);
+            });
         } else {
             return res.status(404).end();
         }
@@ -76,7 +76,6 @@ var storage = multer.diskStorage({
 var upload = multer({ storage: storage }).fields(['files', 'poster']);
 
 app.post('/register', (req, res) => {
-    console.log(req.body.userName, req.body.password);
     seneca.act({ user: 'register', userName: req.body.userName, password: req.body.password, isCreator: req.body.isCreator, avatarUrl: req.body.avatarUrl }, (error, user) => {
         console.log(error, user);
         res.status(201).send(user).end();
@@ -122,7 +121,12 @@ app.get('/files/:filename', (req, res) => {
 
 app.get('/files/', (req, res) => {
     seneca.act({ list: 'files' }, (error, files) => {
-        return res.status(200).send(files).end();
+        if (files.length > 0) {
+            return res.status(200).send(files).end();
+        } else {
+            return res.status(204).send([]).end();
+        }
+
     });
 });
 
@@ -136,13 +140,49 @@ app.get('/files/watch/:filename', (req, res) => {
     });
 });
 
-app.get('/upload/status/:videoId', (req, res) => {
-    seneca.act({ info: 'file', videoId: req.params['videoId'] }, (error, file) => {
-        if (!error) {
-            res.send(file).status(200).end();
-        } else {
-            res.status(404).end();
+app.get('/upload/status/:processId', (req, res) => {
+    const token = req.body.token || req.query.token || req.headers['x-access-token'];
+    seneca.act({ user: 'verify', token: token }, (error, user) => {
+        if (error) {
+            return res.status(401).end();
         }
+        seneca.act({ info: 'process', processId: req.params['processId'], userId: user.userId }, (error, file) => {
+            if (!error) {
+                seneca.act({ info: 'file', videoId: file.processId }, (error, result) => {
+                    result.processInfo = file;
+                    if (!error) {
+                        res.send(result).status(200).end();
+                    } else {
+                        res.status(404).end();
+                    }
+                });
+            } else {
+                res.status(404).end();
+            }
+
+
+        });
+    });
+});
+
+app.get('/uploads', (req, res) => {
+    const token = req.body.token || req.query.token || req.headers['x-access-token'];
+    seneca.act({ user: 'verify', token: token }, (error, user) => {
+        if (error) {
+            return res.status(401).end();
+        }
+        seneca.act({ list: 'processes', userId: user.userId }, (error, files) => {
+            if (!error) {
+                if (files.length > 0) {
+                    res.send(files).status(200).end();
+                } else {
+                    res.status(204).send([]).end();
+                }
+            } else {
+                res.send(new Error('Not authorized')).status(401).end();
+            }
+
+        });
     });
 });
 
@@ -191,7 +231,8 @@ app.post('/upload', (req, res) => {
                                     title: title,
                                     type: type,
                                     posterFile: path.join('files', poster.name),
-                                    videoId: videoId
+                                    videoId: videoId,
+                                    ownerId: user.userId
                                 }, (error, result) => {
                                     res.send(result).status(201).end();
                                 });

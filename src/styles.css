@@ -308,6 +308,12 @@ a.header-control {
     margin-top: 20px;
 }
 
+label.full-width {
+    width: 100%;
+    float: none;
+    margin-bottom: 10px;
+}
+
 .video-controls {
   position: relative;
   top: -106px;

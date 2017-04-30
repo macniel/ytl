@@ -1,6 +1,7 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
-import { Http } from '@angular/http';
+import { Http, RequestOptionsArgs, Headers } from '@angular/http';
+import { BrowserModule, DomSanitizer } from '@angular/platform-browser';
 
 export interface ProcessData {
   processId: number;
@@ -16,6 +17,7 @@ export interface Record {
   isImage: boolean;
   isVideo: boolean;
   isAvailable: boolean;
+  processId: string;
   videoId: string;
   processInfo?: ProcessData;
 };
@@ -25,20 +27,24 @@ export interface Record {
   templateUrl: './studio.component.html',
   styleUrls: ['./studio.component.css']
 })
-export class StudioComponent {
+export class StudioComponent implements OnDestroy {
 
   @ViewChild('#fileUpload') file: HTMLInputElement;
 
   public uploadForm: FormGroup;
   public fileList: Record[];
-  public timer: any[] = [];
+  public timer: any = {};
+
+  public posterPath = 'assets/video_placeholder.png';
 
   private http: Http;
+  private sanitizer: DomSanitizer;
   private selectedFile: File;
   private selectedPosterFile: File;
 
-  constructor(http: Http) {
+  constructor(http: Http, sanitizer: DomSanitizer) {
     this.http = http;
+    this.sanitizer = sanitizer;
     this.uploadForm = new FormGroup({
       file: new FormControl(''),
       title: new FormControl(''),
@@ -53,6 +59,17 @@ export class StudioComponent {
 
   public updatePoster($event) {
     this.selectedPosterFile = (<any>event.srcElement).files[0];
+
+
+    if (this.selectedPosterFile) {
+      const reader = new FileReader();
+      reader.readAsDataURL(this.selectedPosterFile);
+      reader.onload = (e) => {
+        // browser completed reading file - display it
+        this.posterPath = (<any>e.target).result;
+      };
+    }
+
   }
 
   public sendForm() {
@@ -78,8 +95,13 @@ export class StudioComponent {
   }
 
   public getFiles(): any {
-    this.http.get('http://localhost:3000/files/').subscribe((response) => {
-      this.fileList = response.json();
+    const headers = new Headers();
+    headers.append('x-access-token', sessionStorage.getItem('token'));
+    headers.append('Content-Type', 'application/json');
+    const opts: RequestOptionsArgs = { headers: headers };
+    this.http.get('http://localhost:3000/uploads/', opts).subscribe((response) => {
+
+      this.fileList = response.json() == null ? [] : response.json();
       this.fileList.forEach((file) => {
         this.getProcessForFile(file);
       });
@@ -87,22 +109,34 @@ export class StudioComponent {
   }
 
   public getFileSrc(fileName: string) {
-    return 'http://localhost:3000/' + fileName;
+    if (!fileName) {
+      return 'assets/video_placeholder.png';
+    } else {
+      return 'http://localhost:3000/' + fileName;
+    }
   }
 
   public getProcessForFile(file) {
-    if (this.timer[file.videoId]) {
-      clearInterval(this.timer[file.videoId]);
+    const id = !file.processId ? file.videoId : file.processId;
+    if (this.timer[id]) {
+      clearInterval(this.timer[id]);
     }
-    this.timer[file.videoId] = setInterval(() => {
-      this.http.get('http://localhost:3000/upload/status/' + file.videoId)
+    this.timer[id] = setInterval(() => {
+
+      const headers = new Headers();
+      headers.append('x-access-token', sessionStorage.getItem('token'));
+      headers.append('Content-Type', 'application/json');
+      const opts: RequestOptionsArgs = { headers: headers };
+
+      this.http.get('http://localhost:3000/upload/status/' + file.processId, opts)
         .subscribe((response) => {
           const record: Record = response.json();
+
           for (let i = 0; i < this.fileList.length; ++i) {
-            if (this.fileList[i].videoId === record.videoId) {
+            if (this.fileList[i].processId === record.videoId || this.fileList[i].videoId === record.videoId) {
               this.fileList[i] = record;
               if (record.isAvailable === true) {
-                clearInterval(this.timer[file.videoId]);
+                clearInterval(this.timer[id]);
               }
               break;
             }
@@ -110,6 +144,18 @@ export class StudioComponent {
 
         });
     }, 1000);
+  }
+
+
+  getImage() {
+    return this.sanitizer.bypassSecurityTrustStyle('url(\'' + this.posterPath + '\')');
+  }
+
+  public ngOnDestroy(): void {
+    for (const timer of this.timer) {
+      console.log(timer);
+      clearInterval(timer);
+    }
   }
 
 }

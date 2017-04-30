@@ -1,6 +1,7 @@
 import { Observable } from 'rxjs/Observable';
 import { Injectable } from '@angular/core';
 import { Http, Headers, RequestOptionsArgs } from '@angular/http';
+import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import 'rxjs/add/observable/of';
 export interface User {
   userId: string;
@@ -11,7 +12,22 @@ export interface User {
 }
 
 @Injectable()
-export class UserService {
+export class UserService implements CanActivate {
+
+
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
+
+    return this.wsVerify().map((result) => {
+      return result.isLoggedIn;
+    });
+
+  }
+
+  canActivateCreator(route:ActivatedRouteSnapshot, state: RouterStateSnapshot) :Observable<boolean> {
+     return this.wsVerify().map((result) => {
+      return result.isLoggedIn && result.isCreator;
+    });
+  }
 
   constructor(private http: Http) { }
 

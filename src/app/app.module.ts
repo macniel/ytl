@@ -12,6 +12,7 @@ import { ListComponent } from './list/list.component';
 import { RegisterComponent } from './register/register.component';
 import { ViewComponent } from './view/view.component';
 
+
 const appRoutes: Routes = [
   { path: 'create', component: StudioComponent },
   { path: 'register', component: RegisterComponent },
@@ -37,7 +38,7 @@ const appRoutes: Routes = [
     RouterModule.forRoot(appRoutes)
 
   ],
-  providers: [ UserService ],
+  providers: [UserService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

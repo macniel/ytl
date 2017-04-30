@@ -21,19 +21,19 @@ export class AppComponent implements OnInit {
   public popupVisible = false;
 
   private isDescendant(parent, child) {
-     var node = child.parentNode;
-     while (node != null) {
-         if (node == parent) {
-             return true;
-         }
-         node = node.parentNode;
-     }
-     return false;
-}
+    let node = child.parentNode;
+    while (node !== null) {
+      if (node === parent) {
+        return true;
+      }
+      node = node.parentNode;
+    }
+    return false;
+  }
 
   public onClick($event: MouseEvent) {
 
-    if ( $event.srcElement.getAttribute('data-toggle') != 'popupLogin' ) {
+    if ($event.srcElement.getAttribute('data-toggle') != 'popupLogin') {
       this.popupVisible = false;
     }
   }
@@ -46,8 +46,9 @@ export class AppComponent implements OnInit {
   }
 
   public logout() {
-    this.userService.invalidate().subscribe( (user) => {
+    this.userService.invalidate().subscribe((user) => {
       this.user = user;
+      this.router.navigate(['/']);
     });
   }
 
@@ -58,7 +59,6 @@ export class AppComponent implements OnInit {
     };
 
     this.userService.login(loginInfo.userName, loginInfo.password).subscribe((result) => {
-      console.log(result);
       this.userService.verify().subscribe((user) => {
         this.user = user;
         this.loginForm.reset();

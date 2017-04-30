@@ -1,6 +1,6 @@
 <h4 *ngIf="searchedFor == null">Recent Uploads</h4>
 <h4 *ngIf="searchedFor != null">Suchergebnisse zum Begriff: {{searchedFor}}<br/>
-  <small>Treffer: {{fileList.length}}</small></h4>
+  <small>Treffer: {{fileList != null ? fileList.length:'0'}}</small></h4>
 <div class="video-list">
 
   <app-video-item [file]="file" *ngFor="let file of fileList">

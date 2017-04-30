@@ -6,9 +6,9 @@
     </a>
   </div>
 
-  <div class="header-search">
-  <input type="search" class="header-search" />
-  <button>
+  <div class="header-search" [formGroup]="searchForm">
+    <input formControlName="search" type="search" class="header-search" (keyup.enter)="submitSearch()" />
+    <button (click)="submitSearch()">
     <i class="material-icons">search</i>
   </button>
   </div>

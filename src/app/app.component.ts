@@ -1,4 +1,4 @@
-import { Router } from '@angular/router';
+import { Router, NavigationExtras, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Component, ViewChild, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
@@ -18,6 +18,8 @@ export class AppComponent implements OnInit {
 
   public user: User = null;
   public loginForm: FormGroup;
+  public searchForm: FormGroup;
+
   public popupVisible = false;
 
   private isDescendant(parent, child) {
@@ -38,10 +40,20 @@ export class AppComponent implements OnInit {
     }
   }
 
-  constructor(private userService: UserService, private router: Router) {
+  constructor(private userService: UserService, private router: Router, private activatedRoute: ActivatedRoute) {
     this.loginForm = new FormGroup({
       userName: new FormControl(''),
       password: new FormControl('')
+    });
+    this.searchForm = new FormGroup({
+      search: new FormControl('')
+    });
+    this.activatedRoute.queryParams.subscribe((query: { q: string }) => {
+      if (query.q != null && query.q.trim() !== '') {
+        this.searchForm.controls['search'].setValue(query.q);
+      } else {
+        this.searchForm.controls['search'].setValue('');
+      }
     });
   }
 
@@ -76,6 +88,14 @@ export class AppComponent implements OnInit {
     this.userService.verify().subscribe((user) => {
       this.user = user;
     });
+  }
+
+  public submitSearch() {
+    const q = this.searchForm.controls['search'].value;
+    let navigationExtras: NavigationExtras = {
+      queryParams: { 'q': q }
+    };
+    this.router.navigate(['/', 'list'], navigationExtras);
   }
 
 }

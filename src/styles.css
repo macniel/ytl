@@ -439,3 +439,8 @@ h5 hr {
     background-color: rgb(	128, 112, 45 );
 
 }
+
+
+h4 small {
+    font-weight: normal;
+}

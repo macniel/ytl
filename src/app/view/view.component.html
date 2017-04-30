@@ -45,9 +45,10 @@
     <h5><span>Verwandte Videos</span>
       <hr>
     </h5>
-    <app-video-item [file]="file" *ngFor="let file of relatedVideos">
-    </app-video-item>
-
+    <div *ngFor="let file of relatedVideos">
+      <app-video-item [file]="file">
+      </app-video-item>
+    </div>
 
 
   </div>

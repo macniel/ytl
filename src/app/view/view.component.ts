@@ -14,7 +14,7 @@ export interface Record {
   processId: number;
   tags: any;
   ownerName: string;
-  relatedFiles: string[];
+  relatedFiles: { score: number, id: string }[];
 };
 @Component({
   selector: 'app-view',
@@ -116,10 +116,18 @@ export class ViewComponent implements AfterViewInit {
     return this.http.get('http://localhost:3000/files/').map((response) => {
       const videos = response.json();
       const basket = [];
-      for (const video of videos) {
-        if (this.file.relatedFiles.indexOf(video.videoId) !== -1) {
-          basket.push(video);
+      this.file.relatedFiles = this.file.relatedFiles.sort((a, b) => {
+        return b.score - a.score;
+      });
+
+      for (const relatedFile of this.file.relatedFiles) {
+        for (const video of videos) {
+
+          if (relatedFile.id === video.videoId) {
+            basket.push(video);
+          }
         }
+
       }
       return basket;
     });

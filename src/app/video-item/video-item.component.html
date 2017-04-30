@@ -1,4 +1,4 @@
-<div class="" [routerLink]="['/','watch',file.videoId]">
+<a href="/watch/{{file.videoId}}">
   <div class="card-content ">
 
     <img [src]="getFileSrc()" width="300 " height="250 " />
@@ -7,3 +7,4 @@
     <span class="timemark">{{getTimemark(file)}}</span>
 
   </div>
+</a>

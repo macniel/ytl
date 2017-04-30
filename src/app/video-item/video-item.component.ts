@@ -15,7 +15,7 @@ export interface Record {
   selector: 'app-video-item',
   templateUrl: './video-item.component.html',
   styleUrls: ['./video-item.component.css'],
-    host: {'class': 'card'}
+  host: { 'class': 'card' }
 })
 export class VideoItemComponent {
 

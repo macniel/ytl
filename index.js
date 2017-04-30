@@ -125,7 +125,7 @@ app.get('/files/', (req, res) => {
 
 
         seneca.act({ search: 'files', q: req.query.q }, (error, files) => {
-            if ( !files || files.length === 0 ) {
+            if (!files || files.length === 0) {
                 return res.status(204).send([]).end();
             } else {
                 return res.status(200).send(files).end();

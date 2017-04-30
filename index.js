@@ -121,29 +121,29 @@ app.get('/files/:filename', (req, res) => {
 })
 
 app.get('/files/', (req, res) => {
-    if ( req.query.q != null && req.query.q.trim() !== '' ) {
+    if (req.query.q != null && req.query.q.trim() !== '') {
 
 
-    seneca.act({ search: 'files', q: req.query.q }, (error, files) => {
-        if (files.length > 0) {
-            return res.status(200).send(files).end();
-        } else {
-            return res.status(204).send([]).end();
-        }
+        seneca.act({ search: 'files', q: req.query.q }, (error, files) => {
+            if (files.length > 0) {
+                return res.status(200).send(files).end();
+            } else {
+                return res.status(204).send([]).end();
+            }
 
-    });
+        });
 
     } else {
 
 
-    seneca.act({ list: 'files' }, (error, files) => {
-        if (files.length > 0) {
-            return res.status(200).send(files).end();
-        } else {
-            return res.status(204).send([]).end();
-        }
+        seneca.act({ list: 'files' }, (error, files) => {
+            if (files.length > 0) {
+                return res.status(200).send(files).end();
+            } else {
+                return res.status(204).send([]).end();
+            }
 
-    });
+        });
     }
 });
 

@@ -8,7 +8,7 @@ app-root {
   top: 0;
   right: 0;
   bottom: 0;
-  padding: 80px 60px 20px 60px;
+  padding: 80px 20px 20px 20px;
 }
 
 .card {
@@ -16,11 +16,12 @@ app-root {
   border-radius: 2px;
   display: inline-block;
   height: 250px;
-  margin-right: 40px;
+  margin-left: 40px;
   margin-bottom: 20px;
   position: relative;
   width: 300px;
   float: left;
+  box-sizing: border-box;
   box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
 }
 
@@ -268,6 +269,62 @@ a.header-control {
     box-shadow: none;
     height: inherit;
 }
+
+  .container {
+        display: flex;
+        justify-content: center;
+    }
+@media (max-device-width: 1110px) {
+
+    app-root {
+        margin: 80px 0 20px 0;
+    }
+
+    input.header-search {
+        width: 100%;
+    }
+    input.header-search+button {
+
+    }
+
+    .container {
+        display: block;
+        justify-content: inherit;
+    }
+
+    .card-big {
+        float: none;
+        width: inherit;
+        display: block;
+        margin: 0 20px 10px 20px;
+    }
+
+    .card-related {
+        float: none;
+        width: inherit;
+        display: block;
+        margin: 0 20px 10px 20px;
+    }
+
+}
+
+.card:first-child {
+    margin-left: 0;
+}
+
+.blackout {
+    background-color: black;
+}
+
+@media (max-device-width: 680px) {
+    .card-big {
+        margin: 0 0 10px 0;
+    }
+    .card-related {
+        margin: 0 0 10px 0;
+    }
+}
+
 
 .card-register {
     width: 360px;

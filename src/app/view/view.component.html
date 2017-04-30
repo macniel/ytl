@@ -1,50 +1,54 @@
-<div class="card card-big">
+<div class="container">
+  <div class="card card-big">
 
-  <video id="video" *ngIf="file != null" [src]="getFileSrc(file)" [poster]="getPosterFileSrc(file)" width="600" height="500">
-  </video>
-  <div class="video-controls {{isPaused()?'':'video-controls-hide'}}" *ngIf="file != null">
-
-    <div class="video-control time-code">
-      {{timeCode}}
+    <div class="blackout" style="height: 500px">
+      <video id="video" *ngIf="file != null" [src]="getFileSrc(file)" [poster]="getPosterFileSrc(file)" width="600" height="500">
+      </video>
     </div>
+    <div class="video-controls {{isPaused()?'':'video-controls-hide'}}" *ngIf="file != null">
 
-    <div class="video-control skip-previous" (click)="skipPrevious()">
-      <i class="material-icons">skip_previous</i>
+      <div class="video-control time-code">
+        {{timeCode}}
+      </div>
+
+      <div class="video-control skip-previous" (click)="skipPrevious()">
+        <i class="material-icons">skip_previous</i>
+      </div>
+      <div class="video-control play-pause" (click)="playOrPause()">
+        <i class="material-icons">{{isPaused() ? 'play_arrow': 'pause'}}</i>
+      </div>
+      <div class="video-control skip-next" (click)="skipNext()">
+        <i class="material-icons">skip_next</i>
+      </div>
+
     </div>
-    <div class="video-control play-pause" (click)="playOrPause()">
-      <i class="material-icons">{{isPaused() ? 'play_arrow': 'pause'}}</i>
-    </div>
-    <div class="video-control skip-next" (click)="skipNext()">
-      <i class="material-icons">skip_next</i>
-    </div>
+    <div *ngIf="file != null">
 
-  </div>
-  <div *ngIf="file != null">
+      <img class="video-avatar" [style.background-image]="getImage()" />
 
-    <img class="video-avatar" [style.background-image]="getImage()" />
+      <span class="video-title">{{file?.title}}</span>
 
-    <span class="video-title">{{file?.title}}</span>
+      <div class="video-pills">
 
-    <div class="video-pills">
-
-      <span class="tag-pill tag-pill-creator">
+        <span class="tag-pill tag-pill-creator">
         {{file?.ownerName}}
       </span>
-      <span class="tag-pill" *ngFor="let tag of getTags()">
+        <span class="tag-pill" *ngFor="let tag of getTags()">
         {{tag.tagName}}
       </span>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="card card-related">
+  <div class="card card-related">
 
-  <h5><span>Verwandte Videos</span>
-    <hr>
-  </h5>
-  <app-video-item [file]="file" *ngFor="let file of relatedVideos">
-  </app-video-item>
-
+    <h5><span>Verwandte Videos</span>
+      <hr>
+    </h5>
+    <app-video-item [file]="file" *ngFor="let file of relatedVideos">
+    </app-video-item>
 
 
+
+  </div>
 </div>

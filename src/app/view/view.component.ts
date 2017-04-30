@@ -1,6 +1,8 @@
+import { Observable } from 'rxjs/Observable';
 import { Component, OnInit, AfterViewInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Http } from '@angular/http';
+
 export interface Record {
   title: string;
   created: Date;
@@ -10,6 +12,9 @@ export interface Record {
   isVideo: boolean;
   isAvailable: boolean;
   processId: number;
+  tags: any;
+  ownerName: string;
+  relatedFiles: string[];
 };
 @Component({
   selector: 'app-view',
@@ -18,11 +23,13 @@ export interface Record {
 })
 export class ViewComponent implements AfterViewInit {
   public file: Record;
+  public relatedVideos: any[] = [];
 
   private interval: any;
   private timeCode: String = '0:00';
 
-  constructor(private activatedRoute: ActivatedRoute, private http: Http) {
+
+  constructor(private activatedRoute: ActivatedRoute, private http: Http, private router: Router) {
   }
 
   ngAfterViewInit() {
@@ -30,23 +37,27 @@ export class ViewComponent implements AfterViewInit {
     this.activatedRoute.params.subscribe((routeInfo: { id: string }) => {
       this.http.get('http://localhost:3000/files/watch/' + routeInfo.id).subscribe((file) => {
         this.file = file.json();
+        this.getRelatedVideos().subscribe((videos) => {
+          console.log(videos);
+          this.relatedVideos = videos;
+        });
       });
     })
   }
 
-  getFileSrc(file:Record) {
+  getFileSrc(file: Record) {
     return 'http://localhost:3000/' + file.filePath;
   }
 
-  getPosterFileSrc(file:Record) {
+  getPosterFileSrc(file: Record) {
     return 'http://localhost:3000/' + file.posterFilePath;
   }
 
   // media controls
 
   goFullscreen() {
-      const video = document.querySelector('#video');
-      video.requestFullscreen();
+    const video = document.querySelector('#video');
+    video.requestFullscreen();
   }
 
   isPaused() {
@@ -64,19 +75,19 @@ export class ViewComponent implements AfterViewInit {
   }
 
   playOrPause() {
-      const video = document.querySelector('#video');
-      if ( this.isPaused() ) {
-        (<any>video).play();
+    const video = document.querySelector('#video');
+    if (this.isPaused()) {
+      (<any>video).play();
 
-        this.interval = setInterval( () => {
-          this.calculateTimeCode();
-        }, 200);
-      } else {
-        (<any>video).pause();
-        if ( this.interval ) {
-          clearInterval(this.interval);
-        }
+      this.interval = setInterval(() => {
+        this.calculateTimeCode();
+      }, 200);
+    } else {
+      (<any>video).pause();
+      if (this.interval) {
+        clearInterval(this.interval);
       }
+    }
   }
 
   skipPrevious() {
@@ -89,6 +100,29 @@ export class ViewComponent implements AfterViewInit {
     const video = <any>document.querySelector('#video');
     video.currentTime += 10;
     this.calculateTimeCode();
+  }
+
+  getTags() {
+    if (!this.file) {
+      return [];
+    } else {
+      return this.file.tags;
+    }
+  }
+
+
+
+  getRelatedVideos() {
+    return this.http.get('http://localhost:3000/files/').map((response) => {
+      const videos = response.json();
+      const basket = [];
+      for (const video of videos) {
+        if (this.file.relatedFiles.indexOf(video.videoId) !== -1) {
+          basket.push(video);
+        }
+      }
+      return basket;
+    });
   }
 
 }

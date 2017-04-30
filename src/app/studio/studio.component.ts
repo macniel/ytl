@@ -48,7 +48,8 @@ export class StudioComponent implements OnDestroy {
     this.uploadForm = new FormGroup({
       file: new FormControl(''),
       title: new FormControl(''),
-      poster: new FormControl('')
+      poster: new FormControl(''),
+      tags: new FormControl('')
     });
     this.getFiles();
   }
@@ -80,6 +81,8 @@ export class StudioComponent implements OnDestroy {
     formData.append('title', this.uploadForm.controls['title'].value);
     formData.append('files', this.selectedFile);
     formData.append('poster', this.selectedPosterFile);
+    formData.append('tags', this.uploadForm.controls['tags'].value);
+    console.log(this.uploadForm.controls['tags'].value.split(';'));
     xhr.open('POST', 'http://localhost:3000/upload');
     xhr.setRequestHeader('x-access-token', sessionStorage.getItem('token'));
     xhr.onreadystatechange = () => {

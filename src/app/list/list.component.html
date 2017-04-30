@@ -1,12 +1,5 @@
 <h4>Recent Uploads</h4>
 <div class="video-list">
-<div *ngFor="let file of fileList" class="card" [routerLink]="['watch',file.videoId]">
-  <div class="card-content ">
 
-    <img [src]="getFileSrc(file.posterFilePath) " width="300 " height="250 " />
-
-    <span class="title">{{file.title}}</span>
-    <span class="timemark">{{getTimemark(file)}}</span>
-
-  </div>
-</div>
+  <app-video-item [file]="file" *ngFor="let file of fileList">
+  </app-video-item>

@@ -22,6 +22,7 @@ seneca.use('./lib/processInfoMicroservice/router.js', { seneca: seneca, __rootdi
 seneca.use('./lib/converterMicroservice/router.js', { seneca: seneca, __rootdir: __dirname });
 seneca.use('./lib/fileInfoMicroservice/router.js', { seneca: seneca, __rootdir: __dirname });
 seneca.use('./lib/userMicroservice/router.js', { seneca: seneca, __rootdir: __dirname });
+seneca.use('./lib/tagMicroservice/router.js', { seneca: seneca, __rootdir: __dirname });
 const port = process.env.PORT || 3000;
 
 
@@ -133,7 +134,12 @@ app.get('/files/', (req, res) => {
 app.get('/files/watch/:filename', (req, res) => {
     seneca.act({ info: 'file', videoId: req.params['filename'] }, (error, file) => {
         if (!error) {
-            return res.status(200).send(file).end();
+            console.log('before related files', file);
+            seneca.act({ listRelated: 'files', videoId: file.videoId }, (error, relatedFiles) => {
+                console.log('after related files', relatedFiles);
+                file.relatedFiles = relatedFiles;
+                return res.status(200).send(file).end();
+            })
         } else {
             return res.status(404).end();
         }
@@ -201,6 +207,7 @@ app.post('/upload', (req, res) => {
         const file = req.files.files;
         const poster = req.files.poster;
         const title = req.body.title;
+        const tags = req.body.tags.split(";");
 
         upload(req, res, (error) => {
 
@@ -232,7 +239,8 @@ app.post('/upload', (req, res) => {
                                     type: type,
                                     posterFile: path.join('files', poster.name),
                                     videoId: videoId,
-                                    ownerId: user.userId
+                                    ownerId: user.userId,
+                                    tags: tags
                                 }, (error, result) => {
                                     res.send(result).status(201).end();
                                 });

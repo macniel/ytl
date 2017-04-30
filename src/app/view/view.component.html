@@ -20,12 +20,22 @@
 
   </div>
   <h4>{{file?.title}}</h4>
-
+  <span class="tag-pill tag-pill-creator">
+    {{file?.ownerId}}
+  </span>
+  <span class="tag-pill" *ngFor="let tag of getTags()">
+    {{tag.tagName}}
+  </span>
 </div>
 
 <div class="card card-related">
 
-  <h5><span>Verwandte Videos</span><hr></h5>
+  <h5><span>Verwandte Videos</span>
+    <hr>
+  </h5>
+  <app-video-item [file]="file" *ngFor="let file of relatedVideos">
+  </app-video-item>
+
 
 
 </div>

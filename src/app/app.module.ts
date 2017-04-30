@@ -11,6 +11,7 @@ import { StudioComponent } from './studio/studio.component';
 import { ListComponent } from './list/list.component';
 import { RegisterComponent } from './register/register.component';
 import { ViewComponent } from './view/view.component';
+import { VideoItemComponent } from './video-item/video-item.component';
 
 
 const appRoutes: Routes = [
@@ -27,7 +28,8 @@ const appRoutes: Routes = [
     StudioComponent,
     ListComponent,
     RegisterComponent,
-    ViewComponent
+    ViewComponent,
+    VideoItemComponent
   ],
   imports: [
     CommonModule,

@@ -23,8 +23,8 @@ export class UserService implements CanActivate {
 
   }
 
-  canActivateCreator(route:ActivatedRouteSnapshot, state: RouterStateSnapshot) :Observable<boolean> {
-     return this.wsVerify().map((result) => {
+  canActivateCreator(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
+    return this.wsVerify().map((result) => {
       return result.isLoggedIn && result.isCreator;
     });
   }

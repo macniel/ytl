@@ -19,13 +19,22 @@
     </div>
 
   </div>
-  <h4>{{file?.title}}</h4>
-  <span class="tag-pill tag-pill-creator">
-    {{file?.ownerId}}
-  </span>
-  <span class="tag-pill" *ngFor="let tag of getTags()">
-    {{tag.tagName}}
-  </span>
+  <div *ngIf="file != null">
+
+    <img class="video-avatar" [style.background-image]="getImage()" />
+
+    <span class="video-title">{{file?.title}}</span>
+
+    <div class="video-pills">
+
+      <span class="tag-pill tag-pill-creator">
+        {{file?.ownerName}}
+      </span>
+      <span class="tag-pill" *ngFor="let tag of getTags()">
+        {{tag.tagName}}
+      </span>
+    </div>
+  </div>
 </div>
 
 <div class="card card-related">

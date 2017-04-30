@@ -2,6 +2,7 @@ import { Observable } from 'rxjs/Observable';
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Http } from '@angular/http';
+import { BrowserModule, DomSanitizer } from '@angular/platform-browser';
 
 export interface Record {
   title: string;
@@ -14,6 +15,7 @@ export interface Record {
   processId: number;
   tags: any;
   ownerName: string;
+  avatarUrl: string;
   relatedFiles: { score: number, id: string }[];
 };
 @Component({
@@ -23,13 +25,15 @@ export interface Record {
 })
 export class ViewComponent implements AfterViewInit {
   public file: Record;
+
+  public creatorImage: string;
   public relatedVideos: any[] = [];
 
   private interval: any;
   private timeCode: String = '0:00';
 
 
-  constructor(private activatedRoute: ActivatedRoute, private http: Http, private router: Router) {
+  constructor(private activatedRoute: ActivatedRoute, private http: Http, private router: Router, private sanitizer: DomSanitizer) {
   }
 
   ngAfterViewInit() {
@@ -37,12 +41,18 @@ export class ViewComponent implements AfterViewInit {
     this.activatedRoute.params.subscribe((routeInfo: { id: string }) => {
       this.http.get('http://localhost:3000/files/watch/' + routeInfo.id).subscribe((file) => {
         this.file = file.json();
+        this.getCreatorImage();
         this.getRelatedVideos().subscribe((videos) => {
           console.log(videos);
           this.relatedVideos = videos;
         });
       });
     })
+  }
+
+
+  getImage() {
+    return this.sanitizer.bypassSecurityTrustStyle('url(\'' + this.creatorImage + '\')');
   }
 
   getFileSrc(file: Record) {
@@ -131,6 +141,14 @@ export class ViewComponent implements AfterViewInit {
       }
       return basket;
     });
+  }
+
+  getCreatorImage() {
+    if ( !this.file.avatarUrl) {
+      this.creatorImage = 'assets/user_placeholder.png';
+    } else {
+      this.creatorImage = this.file.avatarUrl;
+    }
   }
 
 }

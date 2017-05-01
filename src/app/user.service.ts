@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 import { Http, Headers, RequestOptionsArgs } from '@angular/http';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import 'rxjs/add/observable/of';
-import { environment } from '../environments/environment';
+
 
 export interface User {
   userId: string;

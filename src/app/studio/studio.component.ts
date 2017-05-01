@@ -157,7 +157,6 @@ export class StudioComponent implements OnDestroy {
 
   public ngOnDestroy(): void {
     for (const timer of this.timer) {
-      console.log(timer);
       clearInterval(timer);
     }
   }

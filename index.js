@@ -17,12 +17,7 @@ app.use(bodyParser.json());
 app.use(fileUpload());
 app.use(cors());
 
-const seneca = require('seneca')()
-seneca.use('./lib/processInfoMicroservice/router.js', { seneca: seneca, __rootdir: __dirname });
-seneca.use('./lib/converterMicroservice/router.js', { seneca: seneca, __rootdir: __dirname });
-seneca.use('./lib/fileInfoMicroservice/router.js', { seneca: seneca, __rootdir: __dirname });
-seneca.use('./lib/userMicroservice/router.js', { seneca: seneca, __rootdir: __dirname });
-seneca.use('./lib/tagMicroservice/router.js', { seneca: seneca, __rootdir: __dirname });
+const seneca = require('seneca')().client({ port: 10101, type: 'http' });
 const port = process.env.PORT || 3000;
 
 
@@ -77,8 +72,7 @@ var storage = multer.diskStorage({
 var upload = multer({ storage: storage }).fields(['files', 'poster']);
 
 app.post('/register', (req, res) => {
-    seneca.act({ user: 'register', userName: req.body.userName, password: req.body.password, isCreator: req.body.isCreator, avatarUrl: req.body.avatarUrl }, (error, user) => {
-        console.log(error, user);
+    seneca.act({ service: 'user', user: 'register', userName: req.body.userName, password: req.body.password, isCreator: req.body.isCreator, avatarUrl: req.body.avatarUrl }, (error, user) => {
         res.status(201).send(user).end();
     });
 });
@@ -89,7 +83,7 @@ app.get('/user', (req, res) => {
 
     const token = req.body.token || req.query.token || req.headers['x-access-token'];
 
-    seneca.act({ user: 'verify', token: token }, (error, user) => {
+    seneca.act({ service: 'user', user: 'verify', token: token }, (error, user) => {
         if (!error) {
             res.status(200).send(user).end();
         } else {
@@ -100,7 +94,7 @@ app.get('/user', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-    seneca.act({ user: 'login', userName: req.body.userName, password: req.body.password }, (error, token) => {
+    seneca.act({ service: 'user', user: 'login', userName: req.body.userName, password: req.body.password }, (error, token) => {
         if (!error) {
             res.status(200).send(token).end();
         } else {
@@ -124,7 +118,7 @@ app.get('/files/', (req, res) => {
     if (req.query.q != null && req.query.q.trim() !== '') {
 
 
-        seneca.act({ search: 'files', q: req.query.q }, (error, files) => {
+        seneca.act({ service: 'file', file: 'search', q: req.query.q }, (error, files) => {
             if (!files || files.length === 0) {
                 return res.status(204).send([]).end();
             } else {
@@ -136,7 +130,7 @@ app.get('/files/', (req, res) => {
     } else {
 
 
-        seneca.act({ list: 'files' }, (error, files) => {
+        seneca.act({ service: 'file', file: 'list' }, (error, files) => {
             if (files.length > 0) {
                 return res.status(200).send(files).end();
             } else {
@@ -148,11 +142,9 @@ app.get('/files/', (req, res) => {
 });
 
 app.get('/files/watch/:filename', (req, res) => {
-    seneca.act({ info: 'file', videoId: req.params['filename'] }, (error, file) => {
+    seneca.act({ service: 'file', file: 'info', videoId: req.params['filename'] }, (error, file) => {
         if (!error) {
-            console.log('before related files', file);
-            seneca.act({ listRelated: 'files', videoId: file.videoId }, (error, relatedFiles) => {
-                console.log('after related files', relatedFiles);
+            seneca.act({ service: 'file', file: 'listRelated', videoId: file.videoId }, (error, relatedFiles) => {
                 file.relatedFiles = relatedFiles;
                 return res.status(200).send(file).end();
             })
@@ -164,20 +156,14 @@ app.get('/files/watch/:filename', (req, res) => {
 
 app.get('/upload/status/:processId', (req, res) => {
     const token = req.body.token || req.query.token || req.headers['x-access-token'];
-    seneca.act({ user: 'verify', token: token }, (error, user) => {
+    seneca.act({ service: 'user', user: 'verify', token: token }, (error, user) => {
         if (error) {
             return res.status(401).end();
         }
-        seneca.act({ info: 'process', processId: req.params['processId'], userId: user.userId }, (error, file) => {
+        seneca.act({ service: 'process', process: 'info', processId: req.params['processId'], userId: user.userId }, (error, file) => {
+
             if (!error) {
-                seneca.act({ info: 'file', videoId: file.processId }, (error, result) => {
-                    result.processInfo = file;
-                    if (!error) {
-                        res.send(result).status(200).end();
-                    } else {
-                        res.status(404).end();
-                    }
-                });
+                res.send({processInfo:file}).status(200).end();
             } else {
                 res.status(404).end();
             }
@@ -189,11 +175,11 @@ app.get('/upload/status/:processId', (req, res) => {
 
 app.get('/uploads', (req, res) => {
     const token = req.body.token || req.query.token || req.headers['x-access-token'];
-    seneca.act({ user: 'verify', token: token }, (error, user) => {
+    seneca.act({ service: 'user', user: 'verify', token: token }, (error, user) => {
         if (error) {
             return res.status(401).end();
         }
-        seneca.act({ list: 'processes', userId: user.userId }, (error, files) => {
+        seneca.act({ service: 'process', process: 'list', userId: user.userId }, (error, files) => {
             if (!error) {
                 if (files.length > 0) {
                     res.send(files).status(200).end();
@@ -213,7 +199,7 @@ app.get('/uploads', (req, res) => {
  */
 app.post('/upload', (req, res) => {
     const token = req.body.token || req.query.token || req.headers['x-access-token'];
-    seneca.act({ user: 'verify', token: token }, (error, user) => {
+    seneca.act({ service: 'user', user: 'verify', token: token }, (error, user) => {
         if (!user.isCreator) {
             return res.status(401).send('You are not a creator').end();
         }
@@ -244,13 +230,15 @@ app.post('/upload', (req, res) => {
                 file.mv(path.join(__dirname, 'uploads', fileName), (err) => {
 
                     if (type === 'video') {
-                        seneca.act({ convert: 'video', fileName: fileName, user: user.userId }, (error, data) => {
+                        seneca.act({ service: 'convert', convert: 'video', fileName: fileName, user: user.userId }, (error, data) => {
                             const newFilename = data.fileName;
                             const videoId = data.videoId;
                             poster.mv(path.join(__dirname, 'uploads', poster.name), (err) => {
+                                console.log('main\tUpdate File');
                                 seneca.act({
-                                    update: 'file',
-                                    file: path.join(destinationType, newFilename),
+                                    service: 'file',
+                                    file: 'update',
+                                    fileName: path.join(destinationType, newFilename),
                                     title: title,
                                     type: type,
                                     posterFile: path.join('files', poster.name),

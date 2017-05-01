@@ -75,7 +75,7 @@ hr {
     width: inherit;
 }
 
-.video-progress-card:nth-child(4n+4) {
+.video-progress-card:nth-child(4n+4), .video-list .card:nth-child(4n+4) {
     margin-left: 0;
 }
 

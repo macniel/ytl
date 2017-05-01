@@ -33,7 +33,7 @@
         <span class="tag-pill tag-pill-creator">
         {{file?.ownerName}}
       </span>
-        <span class="tag-pill" *ngFor="let tag of getTags()">
+        <span class="tag-pill" *ngFor="let tag of getTags()" [routerLink]="['/','list']" [queryParams]="{q: tag.tagName.trim()}">
         {{tag.tagName}}
       </span>
       </div>

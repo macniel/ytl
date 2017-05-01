@@ -1,3 +1,4 @@
+import { environment } from './../../environments/environment';
 import { Observable } from 'rxjs/Observable';
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -39,7 +40,8 @@ export class ViewComponent implements AfterViewInit {
   ngAfterViewInit() {
 
     this.activatedRoute.params.subscribe((routeInfo: { id: string }) => {
-      this.http.get('http://localhost:3000/files/watch/' + routeInfo.id).subscribe((file) => {
+
+      this.http.get(environment.API_URL + '/files/watch/' + routeInfo.id).subscribe((file) => {
         this.file = file.json();
         this.getCreatorImage();
         this.getRelatedVideos().subscribe((videos) => {
@@ -56,11 +58,11 @@ export class ViewComponent implements AfterViewInit {
   }
 
   getFileSrc(file: Record) {
-    return 'http://localhost:3000/' + file.filePath;
+    return environment.API_URL + '/' + file.filePath;
   }
 
   getPosterFileSrc(file: Record) {
-    return 'http://localhost:3000/' + file.posterFilePath;
+    return environment.API_URL + '/' + file.posterFilePath;
   }
 
   // media controls
@@ -81,7 +83,7 @@ export class ViewComponent implements AfterViewInit {
     let cT = Math.floor(currentTime % 60);
     let secString = cT <= 9 ? '0' + cT : cT;
 
-    this.timeCode = Math.floor(currentTime / 60) + ":" + secString;
+    this.timeCode = Math.floor(currentTime / 60) + ':' + secString;
   }
 
   playOrPause() {
@@ -123,7 +125,7 @@ export class ViewComponent implements AfterViewInit {
 
 
   getRelatedVideos() {
-    return this.http.get('http://localhost:3000/files/').map((response) => {
+    return this.http.get(environment.API_URL + '/files/').map((response) => {
       const videos = response.json();
       const basket = [];
       this.file.relatedFiles = this.file.relatedFiles.sort((a, b) => {
@@ -144,7 +146,7 @@ export class ViewComponent implements AfterViewInit {
   }
 
   getCreatorImage() {
-    if ( !this.file.avatarUrl) {
+    if (!this.file.avatarUrl) {
       this.creatorImage = 'assets/user_placeholder.png';
     } else {
       this.creatorImage = this.file.avatarUrl;

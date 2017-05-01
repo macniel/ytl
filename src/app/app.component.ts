@@ -92,7 +92,7 @@ export class AppComponent implements OnInit {
 
   public submitSearch() {
     const q = this.searchForm.controls['search'].value;
-    let navigationExtras: NavigationExtras = {
+    const navigationExtras: NavigationExtras = {
       queryParams: { 'q': q }
     };
     this.router.navigate(['/', 'list'], navigationExtras);

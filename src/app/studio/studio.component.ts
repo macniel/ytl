@@ -1,3 +1,4 @@
+import { environment } from './../../environments/environment';
 import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { Http, RequestOptionsArgs, Headers } from '@angular/http';
@@ -83,7 +84,7 @@ export class StudioComponent implements OnDestroy {
     formData.append('poster', this.selectedPosterFile);
     formData.append('tags', this.uploadForm.controls['tags'].value);
     console.log(this.uploadForm.controls['tags'].value.split(';'));
-    xhr.open('POST', 'http://localhost:3000/upload');
+    xhr.open('POST', environment.API_URL + '/upload');
     xhr.setRequestHeader('x-access-token', sessionStorage.getItem('token'));
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4 && xhr.status >= 200 && xhr.status <= 299) {
@@ -102,7 +103,7 @@ export class StudioComponent implements OnDestroy {
     headers.append('x-access-token', sessionStorage.getItem('token'));
     headers.append('Content-Type', 'application/json');
     const opts: RequestOptionsArgs = { headers: headers };
-    this.http.get('http://localhost:3000/uploads/', opts).subscribe((response) => {
+    this.http.get(environment.API_URL + '/uploads/', opts).subscribe((response) => {
 
       this.fileList = response.json() == null ? [] : response.json();
       this.fileList.forEach((file) => {
@@ -115,7 +116,7 @@ export class StudioComponent implements OnDestroy {
     if (!fileName) {
       return 'assets/video_placeholder.png';
     } else {
-      return 'http://localhost:3000/' + fileName;
+      return environment.API_URL + '/' + fileName;
     }
   }
 
@@ -131,7 +132,7 @@ export class StudioComponent implements OnDestroy {
       headers.append('Content-Type', 'application/json');
       const opts: RequestOptionsArgs = { headers: headers };
 
-      this.http.get('http://localhost:3000/upload/status/' + file.processId, opts)
+      this.http.get(environment.API_URL + '/upload/status/' + file.processId, opts)
         .subscribe((response) => {
           const record: Record = response.json();
 

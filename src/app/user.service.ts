@@ -1,8 +1,11 @@
+import { environment } from './../environments/environment.prod';
 import { Observable } from 'rxjs/Observable';
 import { Injectable } from '@angular/core';
 import { Http, Headers, RequestOptionsArgs } from '@angular/http';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import 'rxjs/add/observable/of';
+import { environment } from '../environments/environment';
+
 export interface User {
   userId: string;
   isCreator: boolean;
@@ -39,7 +42,7 @@ export class UserService implements CanActivate {
       headers.append('Content-Type', 'application/json');
       const opts: RequestOptionsArgs = { headers: headers };
 
-      return this.http.post('http://localhost:3000/login', { userName: userName, password: password }, opts).map((result) => {
+      return this.http.post(environment.API_URL + '/login', { userName: userName, password: password }, opts).map((result) => {
         const token = result.json().token;
         sessionStorage.setItem('token', token);
         return token;
@@ -55,7 +58,7 @@ export class UserService implements CanActivate {
     headers.append('Content-Type', 'application/json');
     const opts: RequestOptionsArgs = { headers: headers };
 
-    return this.http.post('http://localhost:3000/register', { userName: userName, password: password, isCreator: isCreator, avatarUrl: avatarUrl }, opts).map((result) => {
+    return this.http.post(environment.API_URL + '/register', { userName: userName, password: password, isCreator: isCreator, avatarUrl: avatarUrl }, opts).map((result) => {
       return true;
     }, (error) => {
       return false;
@@ -70,7 +73,7 @@ export class UserService implements CanActivate {
     headers.append('Content-Type', 'application/json');
     const opts: RequestOptionsArgs = { headers: headers };
 
-    return this.http.get('http://localhost:3000/user', opts).map((result) => {
+    return this.http.get(environment.API_URL + 'user', opts).map((result) => {
       const user = result.json();
       user.isLoggedIn = true;
       return user;

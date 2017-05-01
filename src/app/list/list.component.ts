@@ -1,3 +1,4 @@
+import { environment } from './../../environments/environment';
 import { ActivatedRoute } from '@angular/router';
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Http } from '@angular/http';
@@ -29,14 +30,14 @@ export class ListComponent implements OnInit, AfterViewInit {
   }
 
   public getFiles(): any {
-    this.http.get('http://localhost:3000/files/').subscribe((response) => {
+    this.http.get(environment.API_URL + '/files/').subscribe((response) => {
       this.fileList = response.json();
       this.searchedFor = null;
     });
   }
 
   public searchFiles(q): any {
-    this.http.get('http://localhost:3000/files/?q=' + q).subscribe((response) => {
+    this.http.get(environment.API_URL + '/files/?q=' + q).subscribe((response) => {
       this.fileList = response.json();
       this.searchedFor = q;
     });

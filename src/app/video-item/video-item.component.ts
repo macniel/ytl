@@ -1,3 +1,4 @@
+import { environment } from './../../environments/environment';
 import { Component, Input } from '@angular/core';
 export interface Record {
   title: string;
@@ -24,7 +25,7 @@ export class VideoItemComponent {
   constructor() { }
 
   public getFileSrc() {
-    return 'http://localhost:3000/' + this.file.posterFilePath;
+    return environment.API_URL + '/' + this.file.posterFilePath;
   }
 
   public getTimemark() {

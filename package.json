@@ -5,7 +5,7 @@
   "angular-cli": {},
   "scripts": {
     "start-frontend": "ng serve",
-    "start": "node-dev index.js",
+    "start": "node index.js",
     "test": "ng test",
     "pree2e": "webdriver-manager update --standalone false --gecko false",
     "e2e": "protractor"

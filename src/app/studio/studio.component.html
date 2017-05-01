@@ -20,11 +20,11 @@
     </form>
     <hr>
     <div>
-      <div *ngFor="let file of fileList" class="card">
-        <h2 class="card-title">{{file.title}}</h2>
+      <div *ngFor="let file of fileList" class="card video-progress-card">
+        <h2 class="card-title">{{file.title}} <i class="material-icons {{file?.processInfo?.state!=='ACCESSIBLE'?'rotate':''}}">{{file?.processInfo?.state ==='ACCESSIBLE' ? 'done' : 'sync' }}</i></h2>
         <div class="card-content">
 
-          <img [src]="getFileSrc(file.posterFilePath)" width="300" height="250" /> {{file.processInfo}}
+          <img [src]="getFileSrc(file.posterFilePath)" width="300" height="210" /> {{file.processInfo}}
           <div class="card-process-info" *ngIf="file.processInfo != null && file?.processInfo?.state !== 'ACCESSIBLE'">
 
             <div class="card-process-fill" [style.width]="(100-file?.processInfo?.progress) + '%'">

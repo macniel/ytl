@@ -58,11 +58,12 @@ export class UserService implements CanActivate {
     headers.append('Content-Type', 'application/json');
     const opts: RequestOptionsArgs = { headers: headers };
 
-    return this.http.post(environment.API_URL + '/register', { userName: userName, password: password, isCreator: isCreator, avatarUrl: avatarUrl }, opts).map((result) => {
-      return true;
-    }, (error) => {
-      return false;
-    });
+    return this.http.post(environment.API_URL + '/register', { userName: userName, password: password, isCreator: isCreator, avatarUrl: avatarUrl }, opts)
+      .map((result) => {
+        return true;
+      }, (error) => {
+        return false;
+      });
 
   }
 
@@ -73,7 +74,7 @@ export class UserService implements CanActivate {
     headers.append('Content-Type', 'application/json');
     const opts: RequestOptionsArgs = { headers: headers };
 
-    return this.http.get(environment.API_URL + 'user', opts).map((result) => {
+    return this.http.get(environment.API_URL + '/user', opts).map((result) => {
       const user = result.json();
       user.isLoggedIn = true;
       return user;

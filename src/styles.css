@@ -75,6 +75,19 @@ hr {
     width: inherit;
 }
 
+.video-progress-card:nth-child(4n+4) {
+    margin-left: 0;
+}
+
+.video-progress-card {
+    background-color: rgb(32, 116, 147);
+    color: white;
+}
+
+.video-progress-card .card-title {
+    margin: 5px 0 5px 10px;
+}
+
 label span {
     display: block;
     height: 20px;
@@ -380,6 +393,20 @@ label.full-width {
   padding: 16px 0;
 }
 
+
+@keyframes rotate {
+    from {transform: rotate(0deg)}
+    to {transform: rotate(360deg)}
+}
+.rotate {
+    animation: rotate 2s infinite;
+}
+
+h2 i.material-icons {
+    float: right;
+    margin: 2px 8px 0 0;
+
+}
 
 @keyframes fade_out{
     from {opacity: 1}

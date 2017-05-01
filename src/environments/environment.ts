@@ -5,5 +5,5 @@
 
 export const environment = {
   production: false,
-  API_URL: 'http://dev-env.prcmrftfym.us-west-2.elasticbeanstalk.com'
+  API_URL: 'http://localhost:3000'
 };
